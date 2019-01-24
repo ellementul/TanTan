@@ -13,11 +13,13 @@ function CrDisplay(){
 	.add('green_tank.png')
 	.add('yellow_tank.png')
 	.add('block.jpg')
+	.add('bullet.svg')
 	.load(function(loader, resources){
 		textures.fon = new PIXI.Sprite(resources['fon.svg'].texture);
 		textures.tank0 = new PIXI.Sprite(resources['green_tank.png'].texture);
 		textures.tank1 = new PIXI.Sprite(resources['yellow_tank.png'].texture);
 		textures.block = new PIXI.Sprite(resources['block.jpg'].texture);
+		textures.bullet = new PIXI.Sprite(resources['bullet.svg'].texture);
 		Input.take(InputMess);
 		Input = InputMess;
 	}); 
@@ -40,7 +42,7 @@ function CrDisplay(){
 	function CrObj(mess){
 		switch(mess.type){
 			case "Map": CrMap(mess); break;
-			case "Gamer": CrElem(mess); break;
+			default : CrElem(mess); break;
 		}
 	}
 	
@@ -53,6 +55,7 @@ function CrDisplay(){
 	
 	function DellObj(mess){
 		obj_arr[mess.id].destroy();
+		obj_arr[mess.id] = undefined;
 	}
 	
 	function CrMap(mess){

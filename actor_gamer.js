@@ -30,6 +30,29 @@ function CrGamer(InterDisplay, InterMap){
 			OutputMap(mess);
 		}
 		
+		if(this.fire){
+			Fire.call(this);
+			this.fire = false;
+		}
+	}
+	
+	function Fire(){
+			var axis = 'x';
+			if(this.dir % 2) axis = 'y';
+			var dir = 1;
+			if(this.dir > 1) dir = -1;
+			
+			var b_pos = {x: this.pos.x, y: this.pos.y};
+			b_pos[axis] += dir * (this.box.h + 0.05);
+			
+			var mess = {
+				action: "Fire",
+				source: Gamer.adress,
+				pos: b_pos,
+				dir: this.dir
+			};
+			
+			OutputMap(mess);	
 	}
 	
 	function InputMap(mess){
@@ -90,6 +113,10 @@ function CrGamer(InterDisplay, InterMap){
 	function InputDisp(mess){
 		if(Gamer.online && mess.action == "Move"){
 			Gamer.new_dir = mess.dir;
+		}
+		
+		if(Gamer.online && mess.action == "Fire"){
+			Gamer.fire = true;
 		}
 		
 	}

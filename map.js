@@ -6,28 +6,31 @@ function CrMap(Rout, map){
 	var Output = Rout.connRecip(Input);
 	
 	function Input(mess){
-		if(mess.action == "Create"){
-			CrObj(mess);
+		switch(mess.action){
+			case "Create": CrObj(mess); break;
+			case "Move": MoveElem(mess); break;
+			case "Fire": mess.adr = 0; Output(Object.assign({}, mess)); break;
+			case "Dell": DellObj(mess); break;
 		}
-		if(mess.action == "Move"){
-			MoveElem(mess);
-		}
-		if(mess.action == "Dell"){
-			DellObj(mess);
-		} 
 	}
 	
 	function CrObj(mess){
+		
+		if(mess.type == "Bullet"){
+			MoveBullet(mess);
+			return;
+		}
 		
 		var obj = {
 			source: mess.source,
 			sprite: mess.sprite,
 			box: mess.box
 		};
-		
+
 		var id = obj_arr.add(obj);
 		mess.id = id;
 		obj.id = id;
+		
 		
 		if(mess.type == "Gamer"){
 			mess = CrGamer(mess, obj);
@@ -50,6 +53,7 @@ function CrMap(Rout, map){
 			type: "Elem",
 			id: mess.id
 		};
+		if(mess.type == "Bullet") new_mess.id += 64;
 		
 		gamers.forEach(function(id){
 			if(obj_arr[id]){
@@ -58,7 +62,7 @@ function CrMap(Rout, map){
 			}
 		});
 		
-		obj_arr.dell(mess.id);
+		if(mess.type != "Bullet") obj_arr.dell(mess.id);
 	}
 	
 	function CrGamer(mess, obj){
@@ -84,6 +88,12 @@ function CrMap(Rout, map){
 	}
 
 	function MoveElem(mess){
+		
+		if(mess.type == "Bullet"){
+			MoveBullet(mess);
+			return;
+		}
+		
 		var obj = obj_arr[mess.id];
 		
 		obj.dir = mess.dir;
@@ -114,12 +124,43 @@ function CrMap(Rout, map){
 		
 	}
 	
+	var bullets = {};
+	function MoveBullet(mess){
+		var is_create = (mess.action == "Create");
+		
+		if(!bullets[mess.id] && !is_create) return;
+		
+		if(is_create || isIntoMap(mess, mess.pos)){
+			if(is_create) bullets[mess.id] = true;  else mess.action = "Update";
+			
+			mess.id += 64;
+			gamers.forEach(function(id){
+				mess.adr = obj_arr[id].source;
+				Output(Object.assign({}, mess));
+			});
+		}else{
+			mess.action = "OverMap";
+			mess.adr = mess.source;
+			
+			Output(mess);
+			bullets[mess.id] = false;
+		}
+	}
+	
 	
 	function DellGamer(mess){
 		gamers.dell(gamers.indexOf(mess.id));
 	}
 	
 	function isMove(obj, new_pos){
+		
+		return isIntoMap(obj, new_pos)
+		&& !obj_arr.some(function(wall, id){
+			if(wall.id !== obj.id) return isCollis(obj, new_pos, wall);
+		});
+	}
+	
+	function isIntoMap(obj, new_pos){
 		var w = 'w';
 		var h = 'h';
 		
@@ -131,13 +172,10 @@ function CrMap(Rout, map){
 		return (new_pos.x - obj.box[w]) > 0 
 		&& (new_pos.x + obj.box[w]) < map.size
 		&& (new_pos.y - obj.box[h]) > 0 
-		&& (new_pos.y + obj.box[h]) < map.size
-		&& !obj_arr.some(function(wall, id){
-			if(wall.id !== obj.id) return isCollig(obj, new_pos, wall);
-		});
+		&& (new_pos.y + obj.box[h]) < map.size;
 	}
 	
-	function isCollig(obj, new_pos, wall){
+	function isCollis(obj, new_pos, wall){
 		var o_w = 'w';
 		var o_h = 'h';
 		var w_w = 'w';

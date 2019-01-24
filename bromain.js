@@ -1,4 +1,4 @@
-var onlyClient = true;
+var onlyClient = false;
 var Map_data = {
 		resp: [{pos: {x: 1, y: 1}, dir: 1}, {pos: {x: 15, y: 15}, dir: 3}],
 		size: 16,
@@ -23,7 +23,7 @@ if(onlyClient){
 	
 	var InterDisp = new CrInterfice([CrTypeKeyBoard(), console.log.bind(null, "OutDisp: ")]);
 	InterDisp.is_test = true;
-	CrKeyboard(InterDisp.connect(CrDisplay()), [65, 68, 83, 87, 35]);
+	CrKeyboard(InterDisp.connect(CrDisplay()), [65, 68, 83, 87, 32]);
 
 	var GamerOne = new CrGamer(InterDisp, InterMap);
 	GamerOne.RespGamer();
@@ -37,7 +37,7 @@ if(onlyClient){
 }else{
 	var InterWs = new CrInterfice([CrTypeKeyBoard(), console.log.bind(null, "Client-WS: ")]);
 	InterWs.is_test = true;
-	CrKeyboard(InterWs.connect(CrDisplay()), [65, 68, 83, 87, 37, 38, 39, 40]);
+	CrKeyboard(InterWs.connect(CrDisplay()), [65, 68, 83, 87, 37, 38, 39, 40, 32, 45]);
 
 
 	const socket = new WebSocket('ws://192.168.1.76:8081');

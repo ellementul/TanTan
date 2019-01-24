@@ -21,6 +21,7 @@ var Map_data = {
 const CrInterfice = require("./inter.js");
 const CrRouting = require("./filter.js");
 const CrMap = require("./map.js");
+const CrBullets = require("./Bullets.js");
 const CrGamer = require("./actor_gamer.js");
 
 var InterMap = new CrRouting([
@@ -28,6 +29,7 @@ var InterMap = new CrRouting([
 	console.log.bind(null, "OutputMap: ")
 ]);
 CrMap(InterMap, Map_data);
+CrBullets(InterMap);
 
 var OfflineGamer = [];
 var OnlineGamer = [];
