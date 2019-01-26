@@ -1,19 +1,29 @@
 function CrGamer(InterDisplay, InterMap){
-
+	var bul_adr = "Bullets";
 	var Gamer = {
 		online: false,
 		dir: 1,
 		speed: 0.15,
-		box: {w: 0.9, h: 0.9}
+		box: {w: 0.9, h: 0.9},
+		beg_life: 3
 	};
 	CrDir(Gamer);
 	
 	var OutputDisp = InterDisplay.connect(InputDisp);
 	var OutputMap = InterMap.connect(InputMap);
+	this.OffGamer = Off;
+	this.RespGamer = Resp;
+	
 		
 	
 	
-	Gamer.update = function(){
+	Gamer.scan = function(){
+		OutputDisp({action: "Stat", data: {life: this.life}});
+		
+		if(Gamer.life <= 0){
+			Off();
+			Resp();
+		}
 		
 		if(this.new_dir !== null){
 			
@@ -22,6 +32,7 @@ function CrGamer(InterDisplay, InterMap){
 			
 			var mess = {
 				action: "Move",
+				type: "Gamer",
 				id: this.id,
 				dir: this.dir,
 				dist: dist
@@ -30,13 +41,10 @@ function CrGamer(InterDisplay, InterMap){
 			OutputMap(mess);
 		}
 		
-		if(this.fire){
-			Fire.call(this);
-			this.fire = false;
-		}
+		if(this.press_fire) Gamer.fire();
 	}
 	
-	function Fire(){
+	Gamer.fire = function(){
 			var axis = 'x';
 			if(this.dir % 2) axis = 'y';
 			var dir = 1;
@@ -47,48 +55,32 @@ function CrGamer(InterDisplay, InterMap){
 			
 			var mess = {
 				action: "Fire",
-				source: Gamer.adress,
+				source: this.adress,
 				pos: b_pos,
-				dir: this.dir
+				dir: this.dir,
+				adr: bul_adr
 			};
+			
+			this.press_fire = false;
 			
 			OutputMap(mess);	
 	}
 	
-	function InputMap(mess){
-		if(mess.action == 'Connect'){
-			Gamer.adress = mess.adr;
-		}
-		if(mess.action == 'Create'){
-			if(mess.type == 'Gamer'){
-				if(mess.source == mess.adr){
-					Gamer.pos = {x: mess.pos.x, y: mess.pos.y};
-					Gamer.id = mess.id;
-					Gamer.dir = mess.dir;
-					
-					Gamer.online = true;
-					Gamer.timer = setInterval(Gamer.update.bind(Gamer), 40);
-				}
-				OutputDisp(mess);
-			}else{
-				OutputDisp(mess);
-			}
-		}
-		if(mess.action == 'Update' && Gamer.online){
-			if(mess.id == Gamer.id){
-				Gamer.pos = {x: mess.pos.x, y: mess.pos.y};
-				Gamer.dir = mess.dir;
-			}
-			OutputDisp(mess);
-		}
-		if(mess.action == 'Dell'){
-			OutputDisp(mess);
-		}
+	Gamer.init = function(mess){
+		this.pos = {x: mess.pos.x, y: mess.pos.y};
+		this.id = mess.id;
+		this.dir = mess.dir;
+		this.life = this.beg_life;
 		
-		
+		this.timer = setInterval(Gamer.scan.bind(Gamer), 40);
 	}
 	
-	this.RespGamer = function(){
+	Gamer.update = function(mess){
+		this.pos = {x: mess.pos.x, y: mess.pos.y};
+		this.dir = mess.dir;
+	}
+	
+	function Resp(){
 		OutputMap({
 			action: "Create",
 			type: "Gamer",
@@ -98,9 +90,8 @@ function CrGamer(InterDisplay, InterMap){
 		});
 	}
 	
-	this.OffGamer = function(){
+	function Off(){
 		 clearInterval(Gamer.timer);
-		 Gamer.online = false;
 		 
 		 OutputMap({
 			action: "Dell",
@@ -111,14 +102,33 @@ function CrGamer(InterDisplay, InterMap){
 	}
 	
 	function InputDisp(mess){
-		if(Gamer.online && mess.action == "Move"){
-			Gamer.new_dir = mess.dir;
+		switch(mess.action){
+			case "Move": Gamer.new_dir = mess.dir; break;
+			case "Fire": Gamer.press_fire = true; break;
+		}
+	}
+	
+	function InputMap(mess){
+		if(mess.action == 'Connect'){
+			Gamer.adress = mess.adr;
+			return;
+		}
+		if(mess.type == "Map"){
+			switch(mess.action){
+				case "Create": Gamer.online = true; break;
+				case "Dell": Gamer.online = false; break;
+			}
 		}
 		
-		if(Gamer.online && mess.action == "Fire"){
-			Gamer.fire = true;
+		if(mess.type == 'Gamer' && mess.source == Gamer.adress){
+			switch(mess.action){
+				case "Create": Gamer.init(mess); break;
+				case "Update": Gamer.update(mess); break;
+				case "Damage": Gamer.life--; return; break;
+			}
 		}
 		
+		if(Gamer.online) OutputDisp(mess);
 	}
 	
 	function CrDir(obj){

@@ -1,4 +1,4 @@
-function CrInterfice(testes){
+function CrInterfice(testes, str_log){
 	this.is_test = false; 
 	
 	var InputOne = null;
@@ -10,6 +10,7 @@ function CrInterfice(testes){
 				var begFunc = outputFunc;
 				outputFunc = function(val){
 					testes[0](val);
+					if(str_log) console.log(str_log + " One: ", val);
 					begFunc(val);
 				}
 			}
@@ -19,6 +20,7 @@ function CrInterfice(testes){
 				var begFunc = outputFunc;
 				outputFunc = function(val){
 					testes[1](val);
+					if(str_log) console.log(str_log + " Two: ", val);
 					begFunc(val);
 				}
 			}

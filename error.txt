@@ -1,0 +1,26 @@
+Error: WebSocket is not open!
+    at C:\Users\Павел\проекты\TanTan\ws.js:15:77
+    at C:\Users\Павел\проекты\TanTan\inter.js:36:4
+    at Array.InputMap (C:\Users\Павел\проекты\TanTan\actor_gamer.js:131:20)
+    at CrRouting.input (C:\Users\Павел\проекты\TanTan\filter.js:14:32)
+    at C:\Users\Павел\проекты\TanTan\map.js:63:4
+    at Array.forEach (<anonymous>)
+    at sendAllGamers (C:\Users\Павел\проекты\TanTan\map.js:61:17)
+    at DellObj (C:\Users\Павел\проекты\TanTan\map.js:53:3)
+    at Array.Input [as Default] (C:\Users\Павел\проекты\TanTan\map.js:12:17)
+    at CrRouting.input (C:\Users\Павел\проекты\TanTan\filter.js:14:32)
+C:\Users\Павел\проекты\TanTan\map.js:152
+			if(wall.type !== obj.type || wall.id !== obj.id) return isCollis(obj, new_pos, wall);
+			        ^
+
+TypeError: Cannot read property 'type' of undefined
+    at C:\Users\Павел\проекты\TanTan\map.js:152:12
+    at Array.some (<anonymous>)
+    at isMove (C:\Users\Павел\проекты\TanTan\map.js:151:21)
+    at MoveElem (C:\Users\Павел\проекты\TanTan\map.js:133:6)
+    at Array.Input [as Default] (C:\Users\Павел\проекты\TanTan\map.js:11:17)
+    at CrRouting.input (C:\Users\Павел\проекты\TanTan\filter.js:14:32)
+    at Object.CrGamer.Gamer.scan (C:\Users\Павел\проекты\TanTan\actor_gamer.js:41:4)
+    at ontimeout (timers.js:436:11)
+    at tryOnTimeout (timers.js:300:5)
+    at listOnTimeout (timers.js:263:5)

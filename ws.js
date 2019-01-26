@@ -9,11 +9,10 @@ module.exports = function CrWs(FuncOpen, FuncClose){
 	});
 	
 	
-	
 	function ConnectWs(Inter){
 		var Ws = this;
 		var InFunc = Inter.connect(function(mess){
-			Ws.send(JSON.stringify(mess));
+			if(Ws.readyState == 1) Ws.send(JSON.stringify(mess)); else console.error(new Error("WebSocket is not open!"));
 		});
 		
 		Ws.on('message', function(mess){

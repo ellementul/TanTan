@@ -1,9 +1,10 @@
 function CrBullets(InterMap){
 	var Actor = {
-		bullets: []
+		bullets: [],
+		adress: "Bullets"
 	};
 	
-	var Output = InterMap.connect(Input);
+	var Output = InterMap.connect(Input, Actor.adress);
 	
 	setInterval(function(){
 		Actor.bullets.forEach(MoveBullet);
@@ -44,12 +45,18 @@ function CrBullets(InterMap){
 			id: bull.id,
 			dir: bull.dir,
 			box: Object.assign({}, bull.box),
-			pos: Object.assign({}, bull.pos)
+			pos: Object.assign({}, bull.pos),
+			dir: bull.dir
 		}
 		
 		Output(new_mess);
 		sources[mess.source] = true;
 		setTimeout((function(id){this[id] = false}).bind(sources, mess.source), 1000*bull.recharge);
+	}
+	
+	function DellBull(mess){
+		Output({action: "Dell", type: "Bullet", id: mess.id, type: "Bullet"});
+		Actor.bullets.dell(mess.id);
 	}
 	
 	function MoveBullet(bull){
@@ -72,26 +79,30 @@ function CrBullets(InterMap){
 			source: Actor.adress,
 			id: bull.id,
 			box: Object.assign({}, bull.box),
-			pos: Object.assign({}, bull.pos)
+			pos: Object.assign({}, bull.pos),
+			dir: bull.dir
 		};
 		
 		Output(mess);
 	}
 	
-	function DellBull(mess){
-		console.log("DellBullet: " + mess);
+	function Collision(mess){
+		var bullet = Actor.bullets[mess.id];
+		DellBull({id: mess.id});
 		
-		if(Actor.bullets[mess.id]){
-			Output({action: "Dell", id: mess.id, type: "Bullet"});
-			Actor.bullets.dell(mess.id);
-		}
+		Output({
+			action: "Damage",
+			type: mess.list[0].type,
+			adr: mess.list[0].source,
+			source: mess.list[0].source
+		});
 	}
-		
+	
 	function Input(mess){
 		switch(mess.action){
-			case "Connect": Actor.adress = mess.adr; break;
 			case "Fire": CrBullet(mess); break;
 			case "OverMap": DellBull(mess); break;
+			case "Collision": Collision(mess); break;
 		}
 	}
 	

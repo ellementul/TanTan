@@ -1,27 +1,27 @@
-function CrRouting(testes){
+function CrRouting(testes, is_log){
 	var adr_arr = [];
 	
-	this.connRecip = function(call_func){
-		if(testes[0]){
-			this.input = function(val){
-				testes[0](val);
-				call_func(val);
-			};
-		}else this.input = call_func;
+	this.testes = testes;
+	
+	this.input = function(mess){
+		if(!mess.adr && mess.adr !== 0) mess.adr = "Default";
 		
-		this.connect = function(call_func){
-			var adr = adr_arr.push(call_func) - 1;
-			
+		var adr = mess.adr;
+		if(testes[adr]) testes[adr](mess);
+		
+		delete mess.adr;
+		if(is_log) console.log("SEND", "Adress: " + adr, mess);
+		if(adr_arr[adr]) adr_arr[adr](mess); else throw new Error("Func on adress(" + adr +  ") is not find!");
+		
+		
+	}
+	
+	this.connect = function(call_func, adr){
+		if(adr || adr === 0) adr_arr[adr] = call_func; else{
+			adr = adr_arr.push(call_func) - 1;
 			call_func({action: "Connect", adr: adr});
-			return this.input;
 		}
-		
-		return function(mess){
-			if(adr_arr[mess.adr]){
-				if(testes[1]) testes[1](mess);
-				adr_arr[mess.adr](mess);
-			}
-		}
+		return this.input;
 	}
 }
 //Modules

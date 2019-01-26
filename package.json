@@ -4,7 +4,7 @@
   "description": "2D Shooter Game",
   "main": "main.js",
   "scripts": {
-    "start": "node ./main.js",
+    "start": "node ./main.js 2> error.txt",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [

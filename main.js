@@ -6,17 +6,7 @@ require("./http.js");
 var Map_data = {
 		resp: [{pos: {x: 1, y: 1}, dir: 1}, {pos: {x: 15, y: 15}, dir: 3}],
 		size: 16,
-		data: [{
-				id: 0,
-				sprite: "block",
-				pos: {x: 8, y: 5},
-				box: {w: 0.5, h: 0.5}
-		},{
-				id: 1,
-				sprite: "block",
-				pos: {x: 5, y: 5},
-				box: {w: 0.5, h: 0.5}
-		}]
+		data: []
 };
 const CrInterfice = require("./inter.js");
 const CrRouting = require("./filter.js");
@@ -24,10 +14,7 @@ const CrMap = require("./map.js");
 const CrBullets = require("./Bullets.js");
 const CrGamer = require("./actor_gamer.js");
 
-var InterMap = new CrRouting([
-	 console.log.bind(null, "InputMap: "),
-	console.log.bind(null, "OutputMap: ")
-]);
+var InterMap = new CrRouting([]);
 CrMap(InterMap, Map_data);
 CrBullets(InterMap);
 
