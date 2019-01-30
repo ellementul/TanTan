@@ -1,0 +1,31 @@
+<html>
+	<head>
+		<meta charset="utf-8">
+		<link rel="stylesheet" href="index.css">
+	</head>
+	<body id="window">
+		<div id="tools">
+			<img class="tool" v-bind:src="'img/' + tool +'.svg'" v-for="tool in tools"/>
+		</div>
+		<div id="map">
+			<div id="border">
+				
+			</div>
+		</div>
+		<div id="blocks">
+			<div id="buttons">
+				<button class="button" >ФОН</button>
+				<button class="button" >БЛОКИ</button>
+			</div>
+			<div id="lists">
+				<template v-for="(catigore, key) in cats">
+					<h3 class="head_cats" v-bind:index="key" v-on:click="show">{{ catigore.name }}</h3>
+					<div class="list" v-bind:index="key" v-show="catigore.vis">
+						<img class="block" src="img/fon.svg" v-for="block in catigore.blocks"/>
+					</div>
+				</template>
+			</div>
+		</div>
+	</body>
+	<script src="bundle.js"></script>
+</html>
