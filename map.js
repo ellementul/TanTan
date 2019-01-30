@@ -1,7 +1,8 @@
 function CrMap(Rout, map){
 	
-	var List = {};
-	var gamers = [];
+	var List = {
+			Gamer: []
+		};
 	
 	var Output = Rout.connect(Input, "Default");
 	
@@ -59,8 +60,10 @@ function CrMap(Rout, map){
 	
 	function sendAllGamers(new_mess){
 		List["Gamer"].forEach(function(gamer){
-			new_mess.adr = gamer.source;
-			Output(Object.assign({}, new_mess));
+			if(gamer){
+				new_mess.adr = gamer.source;
+				Output(Object.assign({}, new_mess));
+			}
 		});
 	}
 	
@@ -149,7 +152,7 @@ function CrMap(Rout, map){
 		
 		return isIntoMap(obj, new_pos)
 		&& !List["Gamer"].some(function(wall, id){
-			if(wall.type !== obj.type || wall.id !== obj.id) return isCollis(obj, new_pos, wall);
+			if(wall && (wall.type !== obj.type || wall.id !== obj.id)) return isCollis(obj, new_pos, wall);
 		});
 	}
 	
@@ -181,7 +184,7 @@ function CrMap(Rout, map){
 	
 	function collisBulletGamers(bullet){
 		var list = List["Gamer"].filter(function(wall, id){
-			return isCollis(bullet, bullet.pos, wall);
+			 if(wall) return isCollis(bullet, bullet.pos, wall);
 		}).map(function(obj){
 				return {
 					id: obj.id, 
@@ -248,8 +251,4 @@ function CrMap(Rout, map){
 
 }
 
-//Modules
-
-if(typeof module === "object") module.exports = CrMap;
-
-// Вынести массовую расслку в отдельную функцию!
+module.exports = CrMap;

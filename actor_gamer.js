@@ -1,29 +1,45 @@
-function CrGamer(InterDisplay, InterMap){
+function CrGamer(Roter, Destroy){
 	var bul_adr = "Bullets";
+	var game_mod_adr = "GameMode";
 	var Gamer = {
 		online: false,
 		dir: 1,
 		speed: 0.15,
 		box: {w: 0.9, h: 0.9},
-		beg_life: 3
+		beg_life: 3,
+		kills: 0,
+		deaths: 0
 	};
 	CrDir(Gamer);
 	
-	var OutputDisp = InterDisplay.connect(InputDisp);
-	var OutputMap = InterMap.connect(InputMap);
-	this.OffGamer = Off;
-	this.RespGamer = Resp;
+	var OutputClient = null;
+	var Output = Roter.connect(Input);
+	
+	this.Connect = function(Client){
+		OutputClient = Client.connect(InputClient);
+		
+		Gamer.login = Client.login;
+		OutputClient({action: "Stat", data: {Status: "Watch other gamers", login: Gamer.login}});
+		Output({action: "Reg", login: Gamer.login, source: Gamer.adress, adr: game_mod_adr});
+		
+		Client.disconnect = this.Disconnect;
+		Gamer.online = true;
+		
+		return this;
+	}
+	this.Disconnect = function(){
+		Off();
+		OutputClient = null;
+		Gamer.online = false;
+		Destroy();
+	}
+	this.Off = Off;
+	this.Resp = Resp;
 	
 		
 	
 	
 	Gamer.scan = function(){
-		OutputDisp({action: "Stat", data: {life: this.life}});
-		
-		if(Gamer.life <= 0){
-			Off();
-			Resp();
-		}
 		
 		if(this.new_dir !== null){
 			
@@ -38,10 +54,22 @@ function CrGamer(InterDisplay, InterMap){
 				dist: dist
 			};
 			
-			OutputMap(mess);
+			Output(mess);
 		}
 		
 		if(this.press_fire) Gamer.fire();
+	}
+	
+	Gamer.upStat = function(){
+		OutputClient({
+			action: "Stat", 
+			data: {
+				Status: "Play",
+				life: this.life,
+				deaths: this.deaths,
+				kills: this.kills
+			}
+		});
 	}
 	
 	Gamer.fire = function(){
@@ -63,7 +91,7 @@ function CrGamer(InterDisplay, InterMap){
 			
 			this.press_fire = false;
 			
-			OutputMap(mess);	
+			Output(mess);	
 	}
 	
 	Gamer.init = function(mess){
@@ -72,7 +100,8 @@ function CrGamer(InterDisplay, InterMap){
 		this.dir = mess.dir;
 		this.life = this.beg_life;
 		
-		this.timer = setInterval(Gamer.scan.bind(Gamer), 40);
+		this.scan_timer = setInterval(Gamer.scan.bind(Gamer), 40);
+		this.stat_timer = setInterval(Gamer.upStat.bind(Gamer), 140);
 	}
 	
 	Gamer.update = function(mess){
@@ -80,8 +109,13 @@ function CrGamer(InterDisplay, InterMap){
 		this.dir = mess.dir;
 	}
 	
+	Gamer.destroy = function(){
+		clearInterval(this.scan_timer);
+		clearInterval(this.stat_timer);
+	}
+	
 	function Resp(){
-		OutputMap({
+		if(Gamer.online) Output({
 			action: "Create",
 			type: "Gamer",
 			source: Gamer.adress,
@@ -91,9 +125,9 @@ function CrGamer(InterDisplay, InterMap){
 	}
 	
 	function Off(){
-		 clearInterval(Gamer.timer);
+		 Gamer.destroy();
 		 
-		 OutputMap({
+		 Output({
 			action: "Dell",
 			type: "Gamer",
 			id: Gamer.id,
@@ -101,22 +135,72 @@ function CrGamer(InterDisplay, InterMap){
 		});
 	}
 	
-	function InputDisp(mess){
+	function Damage(mess){
+		Gamer.life--;
+		
+		if(Gamer.life <= 0){
+			Death(mess.killer);
+		}
+	}
+	
+	function Death(killer){
+		Off();
+		Gamer.deaths++;
+		Output({
+			action: "Kill",
+			killer: killer,
+			casualty: Gamer.adress,
+			adr: game_mod_adr
+		});
+		
+		Resp();
+	}
+	
+	function InputClient(mess){
 		switch(mess.action){
 			case "Move": Gamer.new_dir = mess.dir; break;
 			case "Fire": Gamer.press_fire = true; break;
 		}
 	}
 	
-	function InputMap(mess){
+	function Input(mess){
 		if(mess.action == 'Connect'){
 			Gamer.adress = mess.adr;
 			return;
 		}
+		
+		if(mess.action == "Damage"){
+			Damage(mess); 
+			return;
+		}
+		
+		if(mess.action == "Kill"){
+			Gamer.kills++; 
+			return;
+		}
+		
+		if(mess.action == "Win" || mess.action == "Lose"){
+			OutputClient({
+				action: "Stat", 
+				data: {
+					Status: mess.action,
+					Winner: mess.winner,
+					life: Gamer.life,
+					deaths: Gamer.deaths,
+					kills: Gamer.kills
+				}
+			});
+			
+			Gamer.destroy();
+			Gamer.online = false;
+			
+			return;
+		}
+		
 		if(mess.type == "Map"){
 			switch(mess.action){
-				case "Create": Gamer.online = true; break;
-				case "Dell": Gamer.online = false; break;
+				case "Create": Gamer.is_map = true; break;
+				case "Dell": Gamer.is_map = false; break;
 			}
 		}
 		
@@ -124,11 +208,12 @@ function CrGamer(InterDisplay, InterMap){
 			switch(mess.action){
 				case "Create": Gamer.init(mess); break;
 				case "Update": Gamer.update(mess); break;
-				case "Damage": Gamer.life--; return; break;
 			}
 		}
 		
-		if(Gamer.online) OutputDisp(mess);
+		
+		
+		if(Gamer.is_map) OutputClient(mess);
 	}
 	
 	function CrDir(obj){
@@ -155,6 +240,4 @@ function CrGamer(InterDisplay, InterMap){
 	}
 }
 
-//Modules
-
-if(typeof module === "object") module.exports = CrGamer;
+module.exports = CrGamer;

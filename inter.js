@@ -1,26 +1,46 @@
-function CrInterfice(testes, str_log){
-	this.is_test = false; 
+function CrInterfice(testes, log){
+	var is_test = false;
+	
+	this.test = function(new_testes, new_log){
+		if(new_testes){
+			if(typeof(new_testes[0]) == "function" 
+			&& typeof(new_testes[1]) == "function"){
+				
+				testes = new_testes;
+				is_test = true;
+				
+			}else{
+				console.error(new Error("Test is not function!"));
+				is_test = false;
+			}
+		}
+		if(new_log){
+			if(typeof new_log == "function") log = new_log; else log = null;
+		}
+	}
+	
+	if(testes) this.test(testes, log);
 	
 	var InputOne = null;
 	var OutputOne = null;
 	
 	this.connect = function(outputFunc){
 		if(OutputOne){
-			if(this.is_test){
+			if(is_test){
 				var begFunc = outputFunc;
 				outputFunc = function(val){
 					testes[0](val);
-					if(str_log) console.log(str_log + " One: ", val);
+					if(log) log(" One: ", val);
 					begFunc(val);
 				}
 			}
 			return TwoConnect(outputFunc);
 		}else{
-			if(this.is_test){
+			if(is_test){
 				var begFunc = outputFunc;
 				outputFunc = function(val){
 					testes[1](val);
-					if(str_log) console.log(str_log + " Two: ", val);
+					if(log) log(" Two: ", val);
 					begFunc(val);
 				}
 			}
@@ -63,6 +83,4 @@ function CrHoarder(){
 	return push;
 }
 
-//Modules
-
-if(typeof module === "object") module.exports = CrInterfice;
+module.exports = CrInterfice;

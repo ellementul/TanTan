@@ -1,6 +1,7 @@
 function CrBullets(InterMap){
 	var Actor = {
 		bullets: [],
+		is_recharge: [],
 		adress: "Bullets"
 	};
 	
@@ -10,10 +11,8 @@ function CrBullets(InterMap){
 		Actor.bullets.forEach(MoveBullet);
 	}, 100);
 	
-	var sources = [];
-	
 	function CrBullet(mess){
-		if(sources[mess.source]) return;
+		if(Actor.is_recharge[mess.source]) return;
 		
 		var bull = {
 			source: mess.source,
@@ -50,8 +49,10 @@ function CrBullets(InterMap){
 		}
 		
 		Output(new_mess);
-		sources[mess.source] = true;
-		setTimeout((function(id){this[id] = false}).bind(sources, mess.source), 1000*bull.recharge);
+		Actor.is_recharge[mess.source] = true;
+		setTimeout((
+			function(id){this[id] = false}
+		).bind(Actor.is_recharge, mess.source), 1000*bull.recharge);
 	}
 	
 	function DellBull(mess){
@@ -94,7 +95,7 @@ function CrBullets(InterMap){
 			action: "Damage",
 			type: mess.list[0].type,
 			adr: mess.list[0].source,
-			source: mess.list[0].source
+			killer: bullet.source
 		});
 	}
 	
@@ -109,6 +110,4 @@ function CrBullets(InterMap){
 	
 }
 
-//Modules
-
-if(typeof module === "object") module.exports = CrBullets;
+module.exports = CrBullets;

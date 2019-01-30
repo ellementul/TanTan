@@ -8,6 +8,8 @@ function CrDisplay(){
 	var app = new PIXI.Application(window.innerWidth, window.innerHeight, {backgroundColor : 0x1099bb});
 	document.body.appendChild(app.view);
 	
+	
+	
 	var stat = document.createElement("div");
 	stat.style.position = "fixed";
 	document.body.insertBefore(stat, app.view);
@@ -25,17 +27,17 @@ function CrDisplay(){
 	
 	var textures = {};
 	
-	PIXI.loader.add('fon.svg')
-	.add('green_tank.png')
-	.add('yellow_tank.png')
-	.add('block.jpg')
-	.add('bullet.svg')
+	PIXI.loader.add('img/fon.svg')
+	.add('img/green_tank.png')
+	.add('img/yellow_tank.png')
+	.add('img/block.jpg')
+	.add('img/bullet.svg')
 	.load(function(loader, resources){
-		textures.fon = new PIXI.Sprite(resources['fon.svg'].texture);
-		textures.tank0 = new PIXI.Sprite(resources['green_tank.png'].texture);
-		textures.tank1 = new PIXI.Sprite(resources['yellow_tank.png'].texture);
-		textures.block = new PIXI.Sprite(resources['block.jpg'].texture);
-		textures.bullet = new PIXI.Sprite(resources['bullet.svg'].texture);
+		textures.fon = new PIXI.Sprite(resources['img/fon.svg'].texture);
+		textures.tank0 = new PIXI.Sprite(resources['img/green_tank.png'].texture);
+		textures.tank1 = new PIXI.Sprite(resources['img/yellow_tank.png'].texture);
+		textures.block = new PIXI.Sprite(resources['img/block.jpg'].texture);
+		textures.bullet = new PIXI.Sprite(resources['img/bullet.svg'].texture);
 		Input.take(InputMess);
 		Input = InputMess;
 	}); 
@@ -140,4 +142,22 @@ function CrDisplay(){
 	
 }
 
-//Избавиться от лагов, сделать размер окна динамичным
+function CrHoarder(){
+	var hoarder = [];
+	
+	var push = function(val){
+		hoarder.push(val);
+	};
+	
+	push.take = function(func){
+		if(typeof func != "function") return hoarder;
+		
+		hoarder.forEach(function(val){
+				func(val);
+		});
+	}
+	
+	return push;
+}
+
+module.exports = CrDisplay;

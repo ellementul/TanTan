@@ -40,3 +40,5 @@ function CrTypeDisplay(){
 		if(Type.test(val)) throw Type.test(val);
 	}
 }
+
+module.exports = [CrTypeKeyBoard(), CrTypeDisplay()];

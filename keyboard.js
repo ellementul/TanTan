@@ -51,4 +51,4 @@ function CrKeyboard(sendFunc, keys_codes){
 	}
 };
 
-//Переписать для возможности создания двух контролеров
+module.exports = CrKeyboard;

@@ -24,6 +24,5 @@ function CrRouting(testes, is_log){
 		return this.input;
 	}
 }
-//Modules
 
-if(typeof module === "object") module.exports = CrRouting;
+module.exports = CrRouting;
