@@ -1,4 +1,4 @@
-const CrRouting = require("./filter.js");
+const CrRouting = require("../lib/filter.js");
 
 const CrMap = require("./Map.js");
 const CrBullets = require("./Bullets.js");

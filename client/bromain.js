@@ -1,21 +1,21 @@
-require("./mof.js");
-require("./types.js");
+require("../lib/mof.js");
+require("../lib/types.js");
 const PIXI = require("pixi.js");
 
-const CrInterfice = require("./inter.js");
-const CrInterWs = require("./ws_client.js");
+const CrInterfice = require("../lib/inter.js");
+const CrInterWs = require("../lib/ws_client.js");
 
 const Types = require("./inter_types_client.js");
 
-const CrSession = require("./session.js");
+const CrSession = require("../src/session.js");
 const CrKeyboard = require("./keyboard.js");
 const CrDisplay = require("./display.js");
 
-const Map_data = require("./map.json");
+const Map_data = require("../src/map.json");
 
 var onlyClient = false;
 
-var url = 'ws://192.168.1.76:8081';
+var url = 'ws://192.168.0.7:8081';
 
 
 CrGame(onlyClient, url, Map_data);

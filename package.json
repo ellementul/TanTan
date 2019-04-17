@@ -1,10 +1,10 @@
 {
   "name": "tanki",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "2D Shooter Game",
-  "main": "main.js",
+  "main": "./server/main.js",
   "scripts": {
-    "start": "node ./main.js 2> error.txt",
+    "start": "node ./server/main.js 2> error.txt",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
@@ -17,8 +17,6 @@
   "dependencies": {
     "node-static": "^0.7.11",
     "pixi.js": "^4.8.5",
-    "svgo": "^1.1.1",
-    "vue": "^2.5.22",
     "ws": "^6.1.2"
   }
 }

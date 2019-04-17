@@ -1,12 +1,12 @@
-require("./mof.js");
+require("../lib/mof.js");
 require("./http.js");
 
-const CrInterfice = require("./inter.js");
-const CrInterWs = require("./ws_server.js");
+const CrInterfice = require("../lib/inter.js");
+const CrInterWs = require("../lib/ws_server.js");
 
-const CrSession = require("./session.js");
+const CrSession = require("../src/session.js");
 
-const Map_data = require("./map.json");
+const Map_data = require("../src/map.json");
 
 var Session = new CrSession(Map_data, DestroySession);
 
