@@ -1,11 +1,11 @@
 function CrBullets(InterMap){
 	var Actor = {
-		bullets: [],
+		bullets: Array.create(),
 		is_recharge: [],
 		adress: "Bullets"
 	};
 	
-	var Output = InterMap.connect(Input, Actor.adress);
+	var Output = InterMap.connect(Input);
 	
 	setInterval(function(){
 		Actor.bullets.forEach(MoveBullet);

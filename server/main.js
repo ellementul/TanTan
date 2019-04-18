@@ -1,7 +1,7 @@
 require("../lib/mof.js");
 require("./http.js");
 
-const CrInterfice = require("../lib/inter.js");
+
 const CrInterWs = require("../lib/ws_server.js");
 
 const CrSession = require("../src/session.js");

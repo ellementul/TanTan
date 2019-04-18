@@ -165,7 +165,7 @@ function CrGamer(Roter, Destroy){
 	
 	function Input(mess){
 		if(mess.action == 'Connect'){
-			Gamer.adress = mess.adr;
+			Gamer.adress = mess.adress;
 			return;
 		}
 		

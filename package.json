@@ -15,8 +15,10 @@
   "author": "Ellementul_and_Chibi",
   "license": "ISC",
   "dependencies": {
+    "asyncommun": "git+https://github.com/ellementul/AsynCommun.git",
     "node-static": "^0.7.11",
     "pixi.js": "^4.8.5",
+    "typesjs": "git+https://github.com/ellementul/typesjs.git",
     "ws": "^6.1.2"
   }
 }

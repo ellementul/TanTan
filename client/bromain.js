@@ -1,8 +1,8 @@
 require("../lib/mof.js");
-require("../lib/types.js");
+require("typesjs");
 const PIXI = require("pixi.js");
 
-const CrInterfice = require("../lib/inter.js");
+const CrInterfice = require("AsynCommun").CrCommunicator;
 const CrInterWs = require("../lib/ws_client.js");
 
 const Types = require("./inter_types_client.js");
@@ -27,16 +27,16 @@ function CrGame(onlyClient, game_url, Map_data){
 		
 		var Session = new CrSession(Map_data);
 		
-		var InterDisp = new CrInterfice(Types, Crlog("Gamer1"));
-		InterDisp.test();
+		var InterDisp = new CrInterfice();
+		
 		CrKeyboard(InterDisp.connect(CrDisplay()), [65, 68, 83, 87, 32]);
 		InterDisp.login = "Gamer1";
 		
 		Session.Connect(InterDisp);
 		
 
-		InterDisp = new CrInterfice(Types, Crlog("Gamer2"));
-		InterDisp.test();
+		InterDisp = new CrInterfice();
+		
 		CrKeyboard(InterDisp.connect(function(){}), [37, 38, 39, 40, 45]);
 		InterDisp.login = "Gamer2";
 		
@@ -44,8 +44,6 @@ function CrGame(onlyClient, game_url, Map_data){
 		
 	}else{
 		var InterWs = CrInterWs(game_url);
-		
-		InterWs.test(Types, Crlog("Client"));
 		CrKeyboard(InterWs.connect(CrDisplay()), [65, 68, 83, 87, 37, 38, 39, 40, 32, 45]);
 	}
 

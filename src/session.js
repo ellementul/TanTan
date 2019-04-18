@@ -1,4 +1,5 @@
-const CrRouting = require("../lib/filter.js");
+const CrRouting = require("AsynCommun").CrRouter;
+const CrInter = require("AsynCommun").CrCommunicator;
 
 const CrMap = require("./Map.js");
 const CrBullets = require("./Bullets.js");
@@ -12,13 +13,23 @@ function CrSession(Map_data, Destroy){
 	
 	var ready = false;
 	
-	var InterRout = new CrRouting([], true);
-	CrMap(InterRout , Map_data);
-	CrGameMode(InterRout, Param);
-	CrBullets(InterRout);
+	var Router = new CrRouting(true);
+	var MapInter = new CrInter();
+	var GameModeInter = new CrInter();
+	var BulletsInter = new CrInter();
+
+	Router(MapInter, "Default");
+	Router(GameModeInter, "GameMode");
+	Router(BulletsInter, "Bullets");
+
+	CrMap(MapInter , Map_data);
+	CrGameMode(GameModeInter, Param);
+	CrBullets(BulletsInter);
 	
 	var Gamers = Map_data.resp.map(function(resp, i){
-		return new CrGamer(InterRout, DestroyGamer.bind(null, i));
+		var GamerInter = new CrInter();
+		Router(GamerInter, i);
+		return new CrGamer(GamerInter, DestroyGamer.bind(null, i));
 	});
 	
 	var Ready_Gamers = [];

@@ -1,5 +1,5 @@
 function CrGameMode(Router, Param){
-	var Output = Router.connect(Input, "GameMode");
+	var Output = Router.connect(Input);
 	
 	var List_Adr = [];
 	

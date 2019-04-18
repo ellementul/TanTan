@@ -1,10 +1,10 @@
 function CrMap(Rout, map){
 	
 	var List = {
-			Gamer: []
+			Gamer: Array.create()
 		};
 	
-	var Output = Rout.connect(Input, "Default");
+	var Output = Rout.connect(Input);
 	
 	function Input(mess){
 		switch(mess.action){
@@ -29,7 +29,7 @@ function CrMap(Rout, map){
 		};
 		
 
-		if(!List[mess.type]) List[mess.type] = [];
+		if(!List[mess.type]) List[mess.type] = Array.create();
 		var id = List[mess.type].add(obj);
 		obj.id = id;
 		
@@ -159,7 +159,7 @@ function CrMap(Rout, map){
 //===============Bullets================
 	
 	function CrBullet(mess){
-		if(!List["Bullet"]) List["Bullet"] = [];
+		if(!List["Bullet"]) List["Bullet"] = Array.create();
 		List["Bullet"][mess.id] = true;
 		sendAllGamers(mess);
 	}
