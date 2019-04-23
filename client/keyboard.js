@@ -35,11 +35,11 @@ function CrKeyboard(sendFunc, keys_codes){
 			case 39:
 			case 68: mess.dir = 0; break;
 			case 40:
-			case 83: mess.dir = 1; break;
+			case 83: mess.dir = 0.5; break;
 			case 37: 
-			case 65: mess.dir = 2; break;
+			case 65: mess.dir = 1; break;
 			case 38:
-			case 87: mess.dir = 3; break;
+			case 87: mess.dir = -0.5; break;
 			case 32:
 			case 45: mess.action = "Fire"; break;
 		}

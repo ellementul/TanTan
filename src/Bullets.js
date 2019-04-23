@@ -1,3 +1,5 @@
+var types = require("./Types.js");
+
 function CrBullets(InterMap){
 	var Actor = {
 		bullets: Array.create(),
@@ -21,19 +23,24 @@ function CrBullets(InterMap){
 			speed: 0.75,
 			recharge: 0.5
 		};
-		
+
 		var axis = 'x';
 		var add_axis = 'w';
-		if(mess.dir % 2){
-			axis = 'y';
-			add_axis = 'h';
-		}
 		var dir = 1;
-		if(mess.dir > 1) dir = -1;
+		switch(bull.dir){
+			case -0.5: dir = -1;
+			case 0.5: axis = "y"; add_axis = 'h'; break;
+			case 1:
+			case -1: dir = -1; break;
+		}
 		
 		mess.pos[axis] += dir * bull.box[add_axis];
 		
-		bull.pos = Object.assign({}, mess.pos);
+		bull.pos = {x: +mess.pos.x.toFixed(2), y: +mess.pos.y.toFixed(2)};
+		
+		if(types.position.test(bull.pos))
+			return;
+
 		bull.id = Actor.bullets.add(bull);
 		
 		var new_mess = {
@@ -64,12 +71,13 @@ function CrBullets(InterMap){
 		
 		var axis = 'x';
 		var add_axis = 'w';
-		if(bull.dir % 2){
-			axis = 'y';
-			add_axis = 'h';
-		}
 		var dir = 1;
-		if(bull.dir > 1) dir = -1;
+		switch(bull.dir){
+			case -0.5: dir = -1;
+			case 0.5: axis = "y"; add_axis = 'h'; break;
+			case 1:
+			case -1: dir = -1; break;
+		}
 		
 		bull.pos[axis] += dir * bull.speed;
 		

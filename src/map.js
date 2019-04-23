@@ -1,8 +1,9 @@
 function CrMap(Rout, map){
 	
 	var List = {
-			Gamer: Array.create()
-		};
+		Gamer: Array.create()
+	};
+	CrMovingLoop(List.Gamer, Move);
 	
 	var Output = Rout.connect(Input);
 	
@@ -27,7 +28,12 @@ function CrMap(Rout, map){
 			sprite: mess.sprite,
 			box: mess.box
 		};
-		
+
+		if(mess.speed){
+			obj.speed = mess.speed;
+			obj.date = Date.now();
+		}
+
 
 		if(!List[mess.type]) List[mess.type] = Array.create();
 		var id = List[mess.type].add(obj);
@@ -38,7 +44,7 @@ function CrMap(Rout, map){
 			type: obj.type,
 			id: obj.id,
 			sprite: obj.sprite,
-			box: mess.box
+			box: mess.box,
 		};
 		
 		
@@ -123,17 +129,7 @@ function CrMap(Rout, map){
 		var obj = List[mess.type][mess.id];
 		
 		obj.dir = mess.dir;
-		
-		var axis = 'x';
-		if(mess.dir % 2) axis = 'y';
-		var dir = 1;
-		if(mess.dir > 1) dir = -1;
-		
-		
-		var new_pos = {x: obj.pos.x, y: obj.pos.y};
-		new_pos[axis] += dir * mess.dist;
-		
-		if(isMove(obj, new_pos)) obj.pos = new_pos;
+		obj.speed = mess.speed;
 		
 		var new_mess = {
 			action: "Update",
@@ -147,6 +143,43 @@ function CrMap(Rout, map){
 		sendAllGamers(new_mess);
 		
 	}
+
+	function Move(obj){
+		if(obj.speed){
+
+			var axis = 'x';
+			var dir = 1;
+			switch(obj.dir){
+				case -0.5: dir = -1;
+				case 0.5: axis = "y"; break;
+				case 1:
+				case -1: dir = -1; break;
+			}
+			
+			
+			var new_pos = {x: obj.pos.x, y: obj.pos.y};
+			var new_date = Date.now();
+
+			new_pos[axis] += dir * obj.speed * (new_date - obj.date) * 0.0005;
+			
+			
+			if(isMove(obj, new_pos)){
+				obj.pos = new_pos;
+				
+				var new_mess = {
+					action: "Update",
+					type: obj.type,
+					id: obj.id,
+					pos: {x: +obj.pos.x.toFixed(2), y: +obj.pos.y.toFixed(2)},
+					dir: obj.dir,
+					source: obj.source
+				};
+				
+				sendAllGamers(new_mess);
+			}
+		}
+		obj.date = Date.now();
+	}
 	
 	function isMove(obj, new_pos){
 		
@@ -159,14 +192,9 @@ function CrMap(Rout, map){
 //===============Bullets================
 	
 	function CrBullet(mess){
-		newCrBullet(mess);
 		if(!List["Bullet"]) List["Bullet"] = Array.create();
 		List["Bullet"][mess.id] = true;
 		sendAllGamers(mess);
-	}
-
-	function newCrBullet(){
-
 	}
 	
 	function MoveBullet(mess){
@@ -252,8 +280,12 @@ function CrMap(Rout, map){
 		
 		return true;
 	}
- 
-
 }
 
 module.exports = CrMap;
+
+function CrMovingLoop(Objects, Move){
+	setInterval(Objects.forEach.bind(Objects, function(obj){
+		Move(obj);
+	}), 40);
+}

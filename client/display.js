@@ -92,7 +92,7 @@ function CrDisplay(){
 		elem.width = size_cof * mess.box.w * 2;
 		elem.height = size_cof * mess.box.h * 2;
 		
-		if(mess.dir !== undefined) elem.rotation = mess.dir * (Math.PI/2);
+		if(mess.dir !== undefined) elem.rotation = mess.dir * Math.PI;
 		
 		World.add(elem);
 		
@@ -112,7 +112,7 @@ function CrDisplay(){
 			elem.x = mess.pos.x * World.size_cof;
 			elem.y = mess.pos.y * World.size_cof;
 		}
-		if(mess.dir !== undefined) elem.rotation = mess.dir * (Math.PI/2);
+		if(mess.dir !== undefined) elem.rotation = mess.dir * Math.PI;
 	}
 
 //============MAP===============

@@ -15,4 +15,4 @@ exports.position = T.obj({
 	y: T.num(0, map_size, 2)
 });
 
-exports.direction = T.pos(4);
+exports.direction = T.num(-1, 1, 1);

@@ -1,165 +1,52 @@
-var types = require("./Types.js");
 
-function CrGamer(Roter, Destroy){
+
+module.exports = CrClient;
+
+function CrClient(Roter, Destroy){
 	var bul_adr = "Bullets";
 	var game_mod_adr = "GameMode";
-	var Gamer = {
-		online: false,
-		dir: 1,
-		speed: 0.15,
-		box: {w: 0.9, h: 0.9},
-		beg_life: 3,
-		kills: 0,
-		deaths: 0
+
+	
+	
+	
+	var Send = {
+		client: null,
+		map: Roter.connect(Input),
+		bullet: function(mess){
+			mess.adr = bul_adr;
+			this.map(mess);
+		},
+		mode: function(mess){
+			mess.adr = game_mod_adr;
+			this.map(mess);
+		}
 	};
-	CrDir(Gamer);
+
+	var Gamer = new CrGamer(Send);
 	
-	var OutputClient = null;
-	var Output = Roter.connect(Input);
-	
+	this.Resp = Gamer.Resp;
 	this.Connect = function(Client){
-		OutputClient = Client.connect(InputClient);
+		Send.client = Client.connect(InputClient);
 		
 		Gamer.login = Client.login;
-		OutputClient({action: "Stat", data: {Status: "Watch other gamers", login: Gamer.login}});
-		Output({action: "Reg", login: Gamer.login, source: Gamer.adress, adr: game_mod_adr});
+		Send.client({action: "Stat", data: {Status: "Watch other gamers", login: Gamer.login}});
+		Send.map({action: "Reg", login: Gamer.login, source: Gamer.adress, adr: game_mod_adr});
 		
-		Client.disconnect = this.Disconnect;
+		Client.disconnect = Disconnect;
 		Gamer.online = true;
 		
 		return this;
-	}
-	this.Disconnect = function(){
-		Off();
-		OutputClient = null;
+	};
+
+	function Disconnect(){
+		Gamer.Off();
+		Send.client = null;
 		Gamer.online = false;
 		Destroy();
 	}
-	this.Off = Off;
-	this.Resp = Resp;
-	
-		
-	
-	
-	Gamer.scan = function(){
-		
-		if(this.new_dir !== null){
-			
-			var dist = 0;
-			if(!this.updateDir()) dist += this.speed;
-			
-			var mess = {
-				action: "Move",
-				type: "Gamer",
-				id: this.id,
-				dir: this.dir,
-				dist: dist
-			};
-			
-			Output(mess);
-		}
-		
-		if(this.press_fire) Gamer.fire();
-	}
-	
-	Gamer.upStat = function(){
-		OutputClient({
-			action: "Stat", 
-			data: {
-				Status: "Play",
-				life: this.life,
-				deaths: this.deaths,
-				kills: this.kills
-			}
-		});
-	}
-	
-	Gamer.fire = function(){
-			var axis = 'x';
-			if(this.dir % 2) axis = 'y';
-			var dir = 1;
-			if(this.dir > 1) dir = -1;
-			
-			var b_pos = {x: this.pos.x, y: this.pos.y};
-			b_pos[axis] += dir * (this.box.h + 0.05);
 
-			if(types.position.test(b_pos))
-				return;
-			
-			var mess = {
-				action: "Fire",
-				source: this.adress,
-				pos: b_pos,
-				dir: this.dir,
-				adr: bul_adr
-			};
-			
-			this.press_fire = false;
-			
-			Output(mess);	
-	}
 	
-	Gamer.init = function(mess){
-		this.pos = {x: mess.pos.x, y: mess.pos.y};
-		this.id = mess.id;
-		this.dir = mess.dir;
-		this.life = this.beg_life;
-		
-		this.scan_timer = setInterval(Gamer.scan.bind(Gamer), 40);
-		this.stat_timer = setInterval(Gamer.upStat.bind(Gamer), 140);
-	}
 	
-	Gamer.update = function(mess){
-		this.pos = {x: mess.pos.x, y: mess.pos.y};
-		this.dir = mess.dir;
-	}
-	
-	Gamer.destroy = function(){
-		clearInterval(this.scan_timer);
-		clearInterval(this.stat_timer);
-	}
-	
-	function Resp(){
-		if(Gamer.online) Output({
-			action: "Create",
-			type: "Gamer",
-			source: Gamer.adress,
-			box: {w: Gamer.box.w, h: Gamer.box.h},
-			sprite: "tank"
-		});
-	}
-	
-	function Off(){
-		 Gamer.destroy();
-		 
-		 Output({
-			action: "Dell",
-			type: "Gamer",
-			id: Gamer.id,
-			source: Gamer.adress,
-		});
-	}
-	
-	function Damage(mess){
-		Gamer.life--;
-		
-		if(Gamer.life <= 0){
-			Death(mess.killer);
-		}
-	}
-	
-	function Death(killer){
-		Off();
-		Gamer.deaths++;
-		Output({
-			action: "Kill",
-			killer: killer,
-			casualty: Gamer.adress,
-			adr: game_mod_adr
-		});
-		
-		Resp();
-	}
 	
 	function InputClient(mess){
 		switch(mess.action){
@@ -175,7 +62,7 @@ function CrGamer(Roter, Destroy){
 		}
 		
 		if(mess.action == "Damage"){
-			Damage(mess); 
+			Gamer.damage(mess);
 			return;
 		}
 		
@@ -185,7 +72,7 @@ function CrGamer(Roter, Destroy){
 		}
 		
 		if(mess.action == "Win" || mess.action == "Lose"){
-			OutputClient({
+			Send.client({
 				action: "Stat", 
 				data: {
 					Status: mess.action,
@@ -220,32 +107,180 @@ function CrGamer(Roter, Destroy){
 		
 		if(Gamer.is_map){
 			delete mess.source;
-			OutputClient(mess);
+			Send.client(mess);
 		}
 	}
 	
-	function CrDir(obj){
-		var dir = null;
-		obj.addGetSet('new_dir', 
-			function(){return dir},
-			function(new_dir){
-				if(dir === null){
-					dir = new_dir;
-				}
-			}
-		);
-		obj.updateDir = function(){
-			if(obj.dir !== dir){
-				
-				obj.dir = dir; 
-				dir = null;
-				return true;
-				
-			}
-			dir = null;
-			return false;
-		};
-	}
+	
 }
 
-module.exports = CrGamer;
+function CrGamer(Send){
+	var Gamer = {
+		online: false,
+		dir: 0,
+		speed: 7,
+		box: {w: 0.9, h: 0.9},
+		beg_life: 3,
+		kills: 0,
+		deaths: 0
+	};
+
+	CrDir(Gamer);
+
+	Gamer.init = function(mess){
+		this.pos = {x: mess.pos.x, y: mess.pos.y};
+		this.id = mess.id;
+		this.dir = mess.dir;
+		this.life = this.beg_life;
+		
+		this.scan_timer = setInterval(Gamer.scan.bind(Gamer), 40);
+		this.stat_timer = setInterval(Gamer.upStat.bind(Gamer), 140);
+	}
+
+	Gamer.destroy = function(){
+		clearInterval(this.scan_timer);
+		clearInterval(this.stat_timer);
+	}
+
+	Gamer.update = function(mess){
+		this.pos = {x: mess.pos.x, y: mess.pos.y};
+		this.dir = mess.dir;
+	}
+
+	Gamer.upStat = function(){
+		Send.client({
+			action: "Stat", 
+			data: {
+				Status: "Play",
+				life: this.life,
+				deaths: this.deaths,
+				kills: this.kills
+			}
+		});
+	}	
+	
+	
+	Gamer.scan = function(){
+		
+		if(this.is_changed || this.move){
+			this.updateDir();
+
+			var speed = 0;
+			if(this.move)
+				speed = this.speed;
+			
+			var mess = {
+				action: "Move",
+				type: "Gamer",
+				id: this.id,
+				dir: this.dir,
+				speed: speed
+			};
+			
+			Send.map(mess);
+		}
+		
+		if(this.press_fire) Gamer.fire();
+	}
+
+	Gamer.fire = function(){
+			var axis = 'x';
+			var dir = 1;
+			switch(this.dir){
+				case -0.5: dir = -1;
+				case 0.5: axis = "y"; break;
+				case 1:
+				case -1: dir = -1; break;
+			}
+			
+			var b_pos = {x: this.pos.x, y: this.pos.y};
+			b_pos[axis] += dir * (this.box.h + 0.05);
+			
+			var mess = {
+				action: "Fire",
+				source: this.adress,
+				pos: {x: +b_pos.x.toFixed(2), y: +b_pos.y.toFixed(2)},
+				dir: this.dir
+			};
+			
+			Send.bullet(mess);
+			
+			
+			this.press_fire = false;	
+	}
+
+	Gamer.damage = function(mess){
+		Gamer.life--;
+		
+		if(Gamer.life <= 0){
+			Death(mess.killer);
+		}
+	}
+
+	Gamer.Off = Off;
+	Gamer.Resp = Resp;
+
+
+	function Resp(){
+		if(Gamer.online) Send.map({
+			action: "Create",
+			type: "Gamer",
+			source: Gamer.adress,
+			box: {w: Gamer.box.w, h: Gamer.box.h},
+			sprite: "tank"
+		});
+	}
+	
+	function Off(){
+		Gamer.destroy();
+		 
+		Send.map({
+			action: "Dell",
+			type: "Gamer",
+			id: Gamer.id,
+			source: Gamer.adress,
+		});
+	}
+
+	function Death(killer){
+		Off();
+		Gamer.deaths++;
+		Send.mode({
+			action: "Kill",
+			killer: killer,
+			casualty: Gamer.adress
+		});
+		
+		Resp();
+	}
+
+	return Gamer;
+}
+
+function CrDir(obj){
+	var dir = null;
+	obj.is_move = false;
+
+	obj.addGetSet('new_dir', 
+		function(){return dir},
+		function(new_dir){
+			if(dir === null){
+				dir = new_dir;
+				obj.is_changed = true;
+			}
+		}
+	);
+	obj.updateDir = function(){
+		obj.move = false;
+
+		if(obj.dir == dir)
+			obj.move = true;
+
+		if(dir != null){
+			obj.dir = dir; 
+		}
+
+		obj.is_changed = false;
+		dir = null;
+	};
+}

@@ -7,7 +7,7 @@ var types = require("./Types.js");
 function CrTypesKeyboard(){
 	var TypeWalk = T.obj({
 		action: "Move",
-		dir: T.pos(4)
+		dir: types.direction
 	});
 
 	var TypeFire = T.obj({
