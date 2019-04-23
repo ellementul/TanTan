@@ -1,3 +1,5 @@
+var types = require("./Types.js");
+
 function CrGamer(Roter, Destroy){
 	var bul_adr = "Bullets";
 	var game_mod_adr = "GameMode";
@@ -80,6 +82,9 @@ function CrGamer(Roter, Destroy){
 			
 			var b_pos = {x: this.pos.x, y: this.pos.y};
 			b_pos[axis] += dir * (this.box.h + 0.05);
+
+			if(types.position.test(b_pos))
+				return;
 			
 			var mess = {
 				action: "Fire",
@@ -213,7 +218,10 @@ function CrGamer(Roter, Destroy){
 		
 		
 		
-		if(Gamer.is_map) OutputClient(mess);
+		if(Gamer.is_map){
+			delete mess.source;
+			OutputClient(mess);
+		}
 	}
 	
 	function CrDir(obj){

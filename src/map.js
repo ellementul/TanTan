@@ -71,7 +71,7 @@ function CrMap(Rout, map){
 		loadMap(gamer.id, gamer.source);
 		
 		var resp = map.resp[gamer.id];
-		gamer.pos = {x: resp.pos.x, y: resp.pos.y};
+		gamer.pos = {x: +resp.pos.x.toFixed(2), y: +resp.pos.y.toFixed(2)};
 		gamer.dir = resp.dir;
 		gamer.sprite += mess.id;
 		
@@ -103,7 +103,7 @@ function CrMap(Rout, map){
 				type: obj.type,
 				id: obj.id,
 				box: obj.box,
-				pos: Object.assign({}, obj.pos),
+				pos: {x: +obj.pos.x.toFixed(2), y: +obj.pos.y.toFixed(2)},
 				dir: obj.dir,
 				sprite: obj.sprite,
 				source: obj.source,
@@ -139,7 +139,7 @@ function CrMap(Rout, map){
 			action: "Update",
 			type: obj.type,
 			id: obj.id,
-			pos: {x: obj.pos.x, y: obj.pos.y},
+			pos: {x: +obj.pos.x.toFixed(2), y: +obj.pos.y.toFixed(2)},
 			dir: obj.dir,
 			source: obj.source
 		};
@@ -159,9 +159,14 @@ function CrMap(Rout, map){
 //===============Bullets================
 	
 	function CrBullet(mess){
+		newCrBullet(mess);
 		if(!List["Bullet"]) List["Bullet"] = Array.create();
 		List["Bullet"][mess.id] = true;
 		sendAllGamers(mess);
+	}
+
+	function newCrBullet(){
+
 	}
 	
 	function MoveBullet(mess){

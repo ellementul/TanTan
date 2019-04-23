@@ -1,6 +1,7 @@
 require("../lib/mof.js");
 require("./http.js");
 
+const WsTypes = require("../src/WsTypes.js");
 
 const CrInterWs = require("../lib/ws_server.js");
 
@@ -10,7 +11,7 @@ const Map_data = require("../src/map.json");
 
 var Session = new CrSession(Map_data, DestroySession);
 
-var Ws = CrInterWs(Session.Connect);
+var Ws = CrInterWs(Session.Connect, WsTypes[0], WsTypes[1]);
 
 
 function DestroySession(){

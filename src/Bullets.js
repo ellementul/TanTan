@@ -44,8 +44,7 @@ function CrBullets(InterMap){
 			id: bull.id,
 			dir: bull.dir,
 			box: Object.assign({}, bull.box),
-			pos: Object.assign({}, bull.pos),
-			dir: bull.dir
+			pos: {x: +bull.pos.x.toFixed(2), y: +bull.pos.y.toFixed(2)}
 		}
 		
 		Output(new_mess);
@@ -80,7 +79,7 @@ function CrBullets(InterMap){
 			source: Actor.adress,
 			id: bull.id,
 			box: Object.assign({}, bull.box),
-			pos: Object.assign({}, bull.pos),
+			pos: {x: +bull.pos.x.toFixed(2), y: +bull.pos.y.toFixed(2)},
 			dir: bull.dir
 		};
 		
