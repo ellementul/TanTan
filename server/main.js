@@ -9,7 +9,9 @@ const CrSession = require("../src/session.js");
 
 const Map_data = require("../src/map.json");
 
-var Session = new CrSession(Map_data, DestroySession);
+var GamersData = require("../src/gamers.json");
+
+var Session = new CrSession(GamersData, Map_data, DestroySession);
 
 var Ws = CrInterWs(Session.Connect, WsTypes[0], WsTypes[1]);
 

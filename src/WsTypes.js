@@ -34,12 +34,12 @@ function CrTypesDisplay(){
 	var CreateMapType = T.obj({
 		action: "Create",
 		type: "Map",
-		size: types.map_size
+		size: T.pos(types.map_size)
 	});
 
 	var CreateObjType = T.obj({
 		action: "Create",
-		type: T.any("Gamer", "Bullet"),
+		type: T.any("Gamer", "Bullet", "Block"),
 		id: types.obj_id,
 		sprite: T.str(/^[\w\d]*$/, 50),
 		box: types.box,

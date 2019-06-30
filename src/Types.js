@@ -1,7 +1,7 @@
 require("typesjs");
 var T = Object.types;
 
-var map_size = 20;
+var map_size = 25;
 exports.map_size = map_size;
 exports.obj_id = T.pos(map_size*map_size*2);
 

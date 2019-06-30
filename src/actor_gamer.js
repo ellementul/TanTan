@@ -1,4 +1,4 @@
-
+require("../lib/mof.js");
 
 module.exports = CrClient;
 
@@ -6,7 +6,7 @@ function CrClient(Roter, Destroy){
 	var bul_adr = "Bullets";
 	var game_mod_adr = "GameMode";
 
-	
+	var GamerData = null;
 	
 	
 	var Send = {
@@ -22,12 +22,14 @@ function CrClient(Roter, Destroy){
 		}
 	};
 
-	var Gamer = new CrGamer(Send);
+	var Gamer = new CrGamer(Send, Death);
 	
-	this.Resp = Gamer.Resp;
+	this.Resp = Resp;
 	this.Connect = function(Client){
 		Send.client = Client.connect(InputClient);
 		
+		GamerData = Client.data;
+
 		Gamer.login = Client.login;
 		Send.client({action: "Stat", data: {Status: "Watch other gamers", login: Gamer.login}});
 		Send.map({action: "Reg", login: Gamer.login, source: Gamer.adress, adr: game_mod_adr});
@@ -46,6 +48,39 @@ function CrClient(Roter, Destroy){
 	}
 
 	
+
+	function Death(killer){
+		Off();
+		Gamer.deaths++;
+		Send.mode({
+			action: "Kill",
+			killer: killer,
+			casualty: Gamer.adress
+		});
+		
+		Resp();
+	}
+
+	function Resp(){
+		if(Gamer.online) Send.map({
+			action: "Create",
+			type: "Gamer",
+			source: Gamer.adress,
+			box: {w: Gamer.box.w, h: Gamer.box.h},
+			sprite: "tank"
+		});
+	}
+	
+	function Off(){
+		Gamer.destroy();
+		 
+		Send.map({
+			action: "Dell",
+			type: "Gamer",
+			id: Gamer.id,
+			source: Gamer.adress,
+		});
+	}
 	
 	
 	function InputClient(mess){
@@ -114,7 +149,7 @@ function CrClient(Roter, Destroy){
 	
 }
 
-function CrGamer(Send){
+function CrGamer(Send, Death){
 	var Gamer = {
 		online: false,
 		dir: 0,
@@ -124,6 +159,8 @@ function CrGamer(Send){
 		kills: 0,
 		deaths: 0
 	};
+
+	var Gun = new CrGun("Bullet", 7);
 
 	CrDir(Gamer);
 
@@ -184,29 +221,33 @@ function CrGamer(Send){
 	}
 
 	Gamer.fire = function(){
-			var axis = 'x';
-			var dir = 1;
-			switch(this.dir){
-				case -0.5: dir = -1;
-				case 0.5: axis = "y"; break;
-				case 1:
-				case -1: dir = -1; break;
-			}
-			
-			var b_pos = {x: this.pos.x, y: this.pos.y};
-			b_pos[axis] += dir * (this.box.h + 0.05);
-			
-			var mess = {
-				action: "Fire",
-				source: this.adress,
-				pos: {x: +b_pos.x.toFixed(2), y: +b_pos.y.toFixed(2)},
-				dir: this.dir
-			};
-			
-			Send.bullet(mess);
-			
-			
-			this.press_fire = false;	
+		this.press_fire = false;
+
+		if(Gun.is_recharge)
+			return;
+		
+		var axis = 'x';
+		var dir = 1;
+		switch(this.dir){
+			case -0.5: dir = -1;
+			case 0.5: axis = "y"; break;
+			case 1:
+			case -1: dir = -1; break;
+		}
+		
+		var b_pos = {x: this.pos.x, y: this.pos.y};
+		b_pos[axis] += dir * (this.box.h + 0.05);
+		
+		var mess = {
+			action: "Fire",
+			source: this.adress,
+			pos: {x: +b_pos.x.toFixed(2), y: +b_pos.y.toFixed(2)},
+			dir: this.dir
+		};
+		
+		Send.bullet(mess);
+
+		Gun.is_recharge = true;
 	}
 
 	Gamer.damage = function(mess){
@@ -217,44 +258,24 @@ function CrGamer(Send){
 		}
 	}
 
-	Gamer.Off = Off;
-	Gamer.Resp = Resp;
-
-
-	function Resp(){
-		if(Gamer.online) Send.map({
-			action: "Create",
-			type: "Gamer",
-			source: Gamer.adress,
-			box: {w: Gamer.box.w, h: Gamer.box.h},
-			sprite: "tank"
-		});
-	}
-	
-	function Off(){
-		Gamer.destroy();
-		 
-		Send.map({
-			action: "Dell",
-			type: "Gamer",
-			id: Gamer.id,
-			source: Gamer.adress,
-		});
-	}
-
-	function Death(killer){
-		Off();
-		Gamer.deaths++;
-		Send.mode({
-			action: "Kill",
-			killer: killer,
-			casualty: Gamer.adress
-		});
-		
-		Resp();
-	}
-
 	return Gamer;
+}
+
+function CrGun(bull_type, recharge){
+	var is_recharge = false;
+
+	this.addGetSet("is_recharge", 
+		function(){
+			return is_recharge;
+		}, 
+		function(val){
+			is_recharge = val;
+			if(is_recharge)
+				setTimeout((
+					() => is_recharge = false
+				), 100*recharge);
+		}
+	);
 }
 
 function CrDir(obj){

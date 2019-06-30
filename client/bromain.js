@@ -15,7 +15,7 @@ const Map_data = require("../src/map.json");
 
 var onlyClient = false;
 
-var url = 'ws://192.168.0.7:8081';
+var url = 'ws://192.168.137.2:8081';
 
 
 CrGame(onlyClient, url, Map_data);

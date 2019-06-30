@@ -1,9 +1,12 @@
 function CrMap(Rout, map){
 	
 	var List = {
-		Gamer: Array.create()
+		Gamer: Array.create(),
+		Bullet: Array.create(),
+		Block: Array.create()
 	};
 	CrMovingLoop(List.Gamer, Move);
+	CrMovingLoop(List.Bullet, MoveBullet);
 	
 	var Output = Rout.connect(Input);
 	
@@ -19,6 +22,11 @@ function CrMap(Rout, map){
 		
 		if(mess.type == "Bullet"){
 			CrBullet(mess);
+			return;
+		}
+
+		if(mess.type == "Block"){
+			CrBlock(mess);
 			return;
 		}
 		
@@ -76,9 +84,10 @@ function CrMap(Rout, map){
 	function CrGamer(mess, gamer){
 		loadMap(gamer.id, gamer.source);
 		
-		var resp = map.resp[gamer.id];
-		gamer.pos = {x: +resp.pos.x.toFixed(2), y: +resp.pos.y.toFixed(2)};
-		gamer.dir = resp.dir;
+		var resp = map.resp[gamer.id][0];
+		
+		gamer.pos = {x: +resp.x.toFixed(2), y: +resp.y.toFixed(2)};
+		gamer.dir = 0; //=====================================Resp
 		gamer.sprite += mess.id;
 		
 		
@@ -96,13 +105,18 @@ function CrMap(Rout, map){
 	
 	function loadMap(id, adr){
 		var Gamers = List["Gamer"].concat();
-		Gamers[id] = null;
+		var Blocks = List["Block"].concat();
+
+		
 		
 		Output({action: "Create", type: "Map", size: map.size, adr: adr});
-		loadObjs(Gamers, adr);
+		loadBlocks(Blocks, adr);
+
+		Gamers[id] = null;
+		loadGamers(Gamers, adr);
 	}
 	
-	function loadObjs(Objs, adr){
+	function loadGamers(Objs, adr){
 		Objs.forEach(function(obj){
 			if(obj) Output({
 				action: "Create",
@@ -117,13 +131,27 @@ function CrMap(Rout, map){
 			});
 		});
 	}
+
+	function loadBlocks(Blocks, adr){
+		Blocks.forEach(function(obj){
+			if(obj) Output({
+				action: "Create",
+				type: obj.type,
+				id: obj.id,
+				box: obj.box,
+				pos: {x: +obj.pos.x.toFixed(2), y: +obj.pos.y.toFixed(2)},
+				dir: obj.dir,
+				sprite: obj.sprite,
+				adr: adr
+			});
+		});
+	}
 	
 
 	function MoveElem(mess){
 		
 		if(mess.type == "Bullet"){
-			MoveBullet(mess);
-			return;
+			throw new Error();
 		}
 		
 		var obj = List[mess.type][mess.id];
@@ -141,7 +169,6 @@ function CrMap(Rout, map){
 		};
 		
 		sendAllGamers(new_mess);
-		
 	}
 
 	function Move(obj){
@@ -193,50 +220,112 @@ function CrMap(Rout, map){
 	
 	function CrBullet(mess){
 		if(!List["Bullet"]) List["Bullet"] = Array.create();
-		List["Bullet"][mess.id] = true;
-		sendAllGamers(mess);
+		var bull = mess.bull;
+		bull.date = Date.now();
+		List["Bullet"][bull.id] = bull;
+
+		var new_mess = {
+			action: "Create",
+			type: "Bullet",
+			id: bull.id,
+			sprite: bull.sprite,
+			box: {w: bull.box.w, h: bull.box.h},
+			pos: {x: +bull.pos.x.toFixed(2), y: +bull.pos.y.toFixed(2)},
+			dir: bull.dir
+		};
+
+		sendAllGamers(new_mess);
 	}
 	
-	function MoveBullet(mess){
-		if(!List[mess.type][mess.id]) return;
-		
-		if(isIntoMap(mess, mess.pos)){
-			mess.action = "Update";
-			
-			if(collisBulletGamers(mess)){
-				List[mess.type][mess.id] = false;
-			}else sendAllGamers(mess);
-		}else{
-			mess.action = "OverMap";
-			mess.adr = mess.source;
-			
-			Output(mess);
-			List[mess.type][mess.id] = false;
+	function MoveBullet(bull){
+
+		var axis = 'x';
+		var dir = 1;
+		switch(bull.dir){
+			case -0.5: dir = -1;
+			case 0.5: axis = "y"; break;
+			case 1:
+			case -1: dir = -1; break;
 		}
-	}
-	
-	function collisBulletGamers(bullet){
-		var list = List["Gamer"].filter(function(wall, id){
-			 if(wall) return isCollis(bullet, bullet.pos, wall);
-		}).map(function(obj){
-				return {
-					id: obj.id, 
-					type: obj.type, 
-					source: obj.source, 
-					pos: Object.assign({}, obj.pos)
-				};
-		});
 		
-		if(list.length){
-			Output({
-				action: "Collision",
-				id: bullet.id,
-				list: list,
-				adr: bullet.source
+
+		bull.pos[axis] += dir * bull.speed * (Date.now() - bull.date) * 0.0005;
+
+		if(!collisBullet(bull, bull.pos))
+			sendAllGamers({
+				action: "Update",
+				type: "Bullet",
+				id: bull.id,
+				box: {w: bull.box.w, h: bull.box.h},
+				pos: {x: +bull.pos.x.toFixed(2), y: +bull.pos.y.toFixed(2)},
+				dir: bull.dir
 			});
-		}
-		return list.length;
+
+		bull.date = Date.now();
+	}
+
+	function collisBullet(bull, new_pos){
 		
+		if(isIntoMap(bull, new_pos)){
+			
+			var objs = collisBulletObst(bull, "Gamer");
+			var bulls = collisBulletObst(bull, "Bullet");
+			if(objs.length || bulls.length){
+
+				var list = objs;
+				if(!objs.length)
+					list = bulls;
+
+				Output({
+					action: "Collision",
+					id: bull.id,
+					list: list,
+					adr: bull.source
+				});
+
+				List["Bullet"].dell(bull.id);
+				return true;
+			}
+			return false;
+		}else{
+			Output({
+				action: "OverMap",
+				id: bull.id,
+				adr: bull.source
+			});
+			List["Bullet"].dell(bull.id);
+			return true;
+		}
+	}
+	
+	function collisBulletObst(bullet, obst_type){
+		return List[obst_type].filter(function(obst){
+			 if(obst && !(obst.id == bullet.id && obst_type == "Bullet")) 
+			 	return isCollis(bullet, bullet.pos, obst);
+		}).map(function(obj){
+			return {
+				id: obj.id, 
+				type: obst_type, 
+				source: obj.source, 
+				pos: Object.assign({}, obj.pos)
+			};
+		});
+	}
+
+//===============Blocks==================
+
+	function CrBlock(mess){
+		var block = mess.block;
+		var obj = {
+			type: mess.type,
+			pos: {x: block.coords.x, y: block.coords.y},
+			box: {w: block.coords.x + block.size, h: block.coords.x + block.size},
+			dir: block.rotate,
+			sprite: block.images[0],
+		};
+
+		obj.id = List.Block.add(obj);
+
 	}
 	
 //================================
@@ -286,6 +375,6 @@ module.exports = CrMap;
 
 function CrMovingLoop(Objects, Move){
 	setInterval(Objects.forEach.bind(Objects, function(obj){
-		Move(obj);
+		if(obj) Move(obj);
 	}), 40);
 }
