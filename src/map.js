@@ -1,34 +1,81 @@
 function CrMap(Rout, map){
-	
+	var Tiles = Array.create();
+
 	var List = {
 		Gamer: Array.create(),
 		Bullet: Array.create(),
 		Block: Array.create()
 	};
+
 	CrMovingLoop(List.Gamer, Move);
 	CrMovingLoop(List.Bullet, MoveBullet);
 	
 	var Output = Rout.connect(Input);
 	
 	function Input(mess){
+
+		switch(mess.type){
+			case "Tiles":
+				switch(mess.action){
+					case "Create": LoadTiles(mess); break;
+				} 
+				break;
+			case "Bullet": 
+				switch(mess.action){
+					case "Create": CrBullet(mess); break;
+				} 
+				break;
+			case "Gamer": 
+				switch(mess.action){
+					case "Create": CrObj(mess); break;
+					case "Move": MoveElem(mess); break;
+				} 
+				break;
+			default: console.log("Unknown message: ", mess);
+		}
+
 		switch(mess.action){
-			case "Create": CrObj(mess); break;
-			case "Move": MoveElem(mess); break;
 			case "Dell": DellObj(mess); break;
 		}
 	}
 	
-	function CrObj(mess){
+	
+	
+	function DellObj(mess){
 		
-		if(mess.type == "Bullet"){
-			CrBullet(mess);
-			return;
-		}
+		sendAllGamers(mess);
+		if(mess.type == "Gamer") DellGamer(mess);
+		List[mess.type].dell(mess.id);
+	}
 
-		if(mess.type == "Block"){
-			CrBlock(mess);
-			return;
-		}
+//==============TILES=================
+	
+	function LoadTiles(mess){
+		var id = Tiles.add(mess.gamer_tile);
+		mess.gamer_tile.id = id;
+
+		Output({
+			action: "Create",
+			type: "Tiles",
+			tiles: Tiles.concat(),
+			id_gamer_tile: id,
+			source: mess.source,
+			adr: mess.source
+		});
+	}
+
+//==============GAMERS================
+	
+	function sendAllGamers(new_mess){
+		List["Gamer"].forEach(function(gamer){
+			if(gamer){
+				new_mess.adr = gamer.source;
+				Output(Object.assign({}, new_mess));
+			}
+		});
+	}
+
+	function CrObj(mess){
 		
 		var obj = {
 			type: mess.type,
@@ -61,24 +108,6 @@ function CrMap(Rout, map){
 		}
 		
 		sendAllGamers(new_mess);
-	}
-	
-	function DellObj(mess){
-		
-		sendAllGamers(mess);
-		if(mess.type == "Gamer") DellGamer(mess);
-		List[mess.type].dell(mess.id);
-	}
-
-//==============GAMERS================
-	
-	function sendAllGamers(new_mess){
-		List["Gamer"].forEach(function(gamer){
-			if(gamer){
-				new_mess.adr = gamer.source;
-				Output(Object.assign({}, new_mess));
-			}
-		});
 	}
 	
 	function CrGamer(mess, gamer){

@@ -62,6 +62,19 @@ function CrTypesDisplay(){
 			id: types.obj_id,
 	});
 
+	var TileType = T.obj({
+			id: types.obj_id,
+			images: T.arr(T.str(/^[\w\d\s+:;.,?!=#\/<>"()-\]}{]*$/, 1024*1024)),
+			type: T.any("steel"),
+			size: T.pos(types.map_size)
+	});
+
+	var CrTilesType = T.obj({
+		action: "Create",
+		type: "Tiles",
+		tiles: T.arr(TileType, 64, false)
+	});
+
 	// var DelMapType = T.obj({
 	// 		action: "Dell",
 	// 		type: "Map"
@@ -73,8 +86,13 @@ function CrTypesDisplay(){
 		else
 			switch(mess.action){
 				case "Create":
-					ValidError(CreateObjType.test, mess);
+
+					switch(mess.type){
+						case "Tiles": ValidError(CrTilesType.test, mess); break;
+						//default: ValidError(CreateObjType.test, mess); break; 
+					}
 					break;
+
 				case "Update":
 					ValidError(UpdateObjType.test, mess);
 					break;

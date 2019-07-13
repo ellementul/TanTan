@@ -16,6 +16,7 @@
   "license": "ISC",
   "dependencies": {
     "asyncommun": "git+https://github.com/ellementul/AsynCommun.git",
+    "js-base64": "^2.5.1",
     "node-static": "^0.7.11",
     "pixi.js": "^4.8.5",
     "typesjs": "git+https://github.com/ellementul/typesjs.git",

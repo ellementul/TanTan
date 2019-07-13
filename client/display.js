@@ -24,10 +24,26 @@ function CrDisplay(){
 		}
 		stat.innerHTML = "<p>" + str + "</p>";
 	};
+
+	var Tiles = [];
+
+	function drawSvg(svg_str){
+		var img = document.createElement('img');
+		img.src = "data:image/svg+xml;base64,"+ Base64.encode(svg_str);
+		return PIXI.Sprite.from(img);
+	}
+
+	function AddTile(tile){
+		tile.images = tile.images.map(drawSvg);
+		Tiles[tile.id] = tile;
+	}
 	
-	var textures = {};
+	function LoadTiles(mess){
+		mess.tiles.forEach(AddTile);
+		console.log(Tiles);
+	}
 	
-	PIXI.loader.add('img/fon.svg')
+	/*PIXI.loader.add('img/fon.svg')
 	.add('img/green_tank.png')
 	.add('img/yellow_tank.png')
 	.add('img/block.jpg')
@@ -40,18 +56,23 @@ function CrDisplay(){
 		textures.bullet = new PIXI.Sprite(resources['img/bullet.svg'].texture);
 		Input.take(InputMess);
 		Input = InputMess;
-	}); 
+	}); */
 	
 
 	
 	
 	return function(val){
-		Input(val);
+		InputMess(val);
 	}
-	
+
 	function InputMess(mess){
 		switch(mess.action){
-			case "Create": CrObj(mess); break;
+			case "Create": 
+				switch(mess.type){
+					case "Tiles": LoadTiles(mess); break;
+					//default: CrObj(mess); break; 
+				}
+				break;
 			case "Update": UpObj(mess); break;
 			case "Dell": DellObj(mess); break;
 			case "Stat": Stat.write(mess.data); break;

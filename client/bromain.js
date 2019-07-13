@@ -1,5 +1,8 @@
 require("../lib/mof.js");
 require("typesjs");
+
+const Base64 = require("js-base64").Base64;
+
 const PIXI = require("pixi.js");
 
 const CrInterfice = require("AsynCommun").CrCommunicator;

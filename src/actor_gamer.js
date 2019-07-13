@@ -2,7 +2,7 @@ require("../lib/mof.js");
 
 module.exports = CrClient;
 
-function CrClient(Roter, Destroy){
+function CrClient(Roter, Ready, Destroy){
 	var bul_adr = "Bullets";
 	var game_mod_adr = "GameMode";
 
@@ -22,6 +22,7 @@ function CrClient(Roter, Destroy){
 		}
 	};
 
+
 	var Gamer = new CrGamer(Send, Death);
 	
 	this.Resp = Resp;
@@ -32,7 +33,9 @@ function CrClient(Roter, Destroy){
 
 		Gamer.login = Client.login;
 		Send.client({action: "Stat", data: {Status: "Watch other gamers", login: Gamer.login}});
+
 		Send.map({action: "Reg", login: Gamer.login, source: Gamer.adress, adr: game_mod_adr});
+		Send.map({action: "Create", type: "Tiles", source: Gamer.adress, gamer_tile: GamerData.tile});
 		
 		Client.disconnect = Disconnect;
 		Gamer.online = true;
@@ -41,7 +44,7 @@ function CrClient(Roter, Destroy){
 	};
 
 	function Disconnect(){
-		Gamer.Off();
+		Off();
 		Send.client = null;
 		Gamer.online = false;
 		Destroy();
@@ -90,10 +93,20 @@ function CrClient(Roter, Destroy){
 		}
 	}
 	
+	
 	function Input(mess){
 		if(mess.action == 'Connect'){
 			Gamer.adress = mess.adress;
 			return;
+		}
+
+		if(mess.action == 'Create' && mess.type=='Tiles' &&  mess.source == Gamer.adress){
+			GamerData.tile.id = mess.id_gamer_tile;
+			Send.client({
+				action: mess.action,
+				type: mess.type,
+				tiles: mess.tiles
+			});
 		}
 		
 		if(mess.action == "Damage"){

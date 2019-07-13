@@ -36,22 +36,28 @@ function CrSession(GamersData, Map_data, Destroy){
 	var Gamers = Map_data.resp.map(function(resp, i){
 		var GamerInter = new CrInter();
 		Router(GamerInter, i);
-		return new CrGamer(GamerInter, DestroyGamer.bind(null, i));
+		return new CrGamer(GamerInter, Ready, DestroyGamer.bind(null, i));
 	});
 	
-	var Ready_Gamers = [];
+	var Len_Gamers = Gamers.length;
+	var Ready_Gamers = 0;
+	var Play_Gamers = 0;
 	this.Connect = function(Client){
 
 		Client.data = GamersData[Client.login];
 		
-		if(Gamers.length && !ready){
-			Ready_Gamers[Gamers.length - 1] = (Gamers.pop()).Connect(Client);
-			
-			if(!Gamers.length){
-				Ready_Gamers.forEach(function(Gamer){Gamer.Resp()});
-				ready = true;
-			}
-		}else Client.disconnect({action: "Stat", data: {Status: "Max gamers on map!"}});
+		if(Len_Gamers !== Ready_Gamers){
+			Gamers[Ready_Gamers].Connect(Client);
+			Ready_Gamers++;
+		}
+		else 
+			Client.disconnect({action: "Stat", data: {Status: "Max gamers on map!"}});
+	}
+
+	function Ready(){
+		Play_Gamers++;
+		if(Play_Gamers === Len_Gamers)
+			Ready_Gamers.forEach(function(Gamer){Gamer.Resp()});
 	}
 	
 	function DestroyGamer(index){
