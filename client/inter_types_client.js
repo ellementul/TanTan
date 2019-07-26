@@ -1,10 +1,12 @@
 require("typesjs");
 function CrTypeKeyBoard(){
 	var T = Object.types;
+	
 	var Type = T.any({
 		action: "Move",
 		dir: T.pos(4)
 	}, {action: "Fire"});
+
 	return function(val){
 		if(Type.test(val)) throw Type.test(val);
 		return val;

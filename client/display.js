@@ -8,11 +8,14 @@ function CrDisplay(){
 	var app = new PIXI.Application(window.innerWidth, window.innerHeight, {backgroundColor : 0x1099bb});
 	document.body.appendChild(app.view);
 	
-	
+//==================STAT==============================
 	
 	var stat = document.createElement("div");
 	stat.style.position = "fixed";
 	document.body.insertBefore(stat, app.view);
+
+
+
 	Stat.write = function(obj){
 		for (var key in obj){
 			this.data[key] = obj[key];
@@ -24,6 +27,8 @@ function CrDisplay(){
 		}
 		stat.innerHTML = "<p>" + str + "</p>";
 	};
+
+//===============PreLoadTiles========================
 
 	var Tiles = [];
 
@@ -40,7 +45,7 @@ function CrDisplay(){
 	
 	function LoadTiles(mess){
 		mess.tiles.forEach(AddTile);
-		console.log(Tiles);
+		ReadyTiles();
 	}
 	
 	/*PIXI.loader.add('img/fon.svg')
@@ -59,11 +64,13 @@ function CrDisplay(){
 	}); */
 	
 
+//==================INPUT===============	
 	
-	
-	return function(val){
+	this.input =  function(val){
 		InputMess(val);
 	}
+
+	return this;
 
 	function InputMess(mess){
 		switch(mess.action){
@@ -78,6 +85,15 @@ function CrDisplay(){
 			case "Stat": Stat.write(mess.data); break;
 		}
 	}
+
+	function ReadyTiles(){
+		this.output({
+			action: "ReadyLoad",
+			type: "Tiles"
+		});
+	}
+
+//===============Objects==================
 	
 	function CrObj(mess){
 		switch(mess.type){

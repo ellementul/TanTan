@@ -87,6 +87,7 @@ function CrClient(Roter, Ready, Destroy){
 	
 	
 	function InputClient(mess){
+		console.log(mess);
 		switch(mess.action){
 			case "Move": Gamer.new_dir = mess.dir; break;
 			case "Fire": Gamer.press_fire = true; break;

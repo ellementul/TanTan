@@ -26,7 +26,7 @@ CrGame(onlyClient, url, Map_data);
 
 function CrGame(onlyClient, game_url, Map_data){
 
-	if(onlyClient){
+	/*if(onlyClient)
 		
 		var Session = new CrSession(Map_data);
 		
@@ -45,10 +45,12 @@ function CrGame(onlyClient, game_url, Map_data){
 		
 		Session.Connect(InterDisp);
 		
-	}else{
-		var InterWs = CrInterWs(game_url);
-		CrKeyboard(InterWs.connect(CrDisplay()), [65, 68, 83, 87, 37, 38, 39, 40, 32, 45]);
-	}
+	*/
+	var InterWs = CrInterWs(game_url);
+	var Display =  CrDisplay();
+	var Output = InterWs.connect(Display.input);
+	Display.output = Output;
+	CrKeyboard(Output, [65, 68, 83, 87, 37, 38, 39, 40, 32, 45]);
 
 	
 }

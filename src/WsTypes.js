@@ -5,6 +5,11 @@ var T = Object.types;
 var types = require("./Types.js");
 
 function CrTypesKeyboard(){
+	var TypeReadyTiles = T.obj({
+		action: "ReadyLoad",
+		type: "Tiles"
+	});
+
 	var TypeWalk = T.obj({
 		action: "Move",
 		dir: types.direction
@@ -23,6 +28,10 @@ function CrTypesKeyboard(){
 			case "Fire":
 				ValidError(TypeFire.test, mess); 
 				break;
+			case "ReadyLoad":
+				ValidError(TypeReadyTiles.test, mess); 
+				break;
+			default: ValidDefault(mess);
 		}
 		return mess;
 	}
@@ -107,6 +116,10 @@ function CrTypesDisplay(){
 function ValidError(test, val){
 	if(test(val))
 		throw new Error(JSON.stringify({type: test(val), value: val}, "", 4));
+}
+
+function ValidDefault(val){
+	throw new Error(JSON.stringify({type: "unknowed type", value: val}, "", 4));
 }
 
 module.exports = [CrTypesKeyboard(), CrTypesDisplay()];
