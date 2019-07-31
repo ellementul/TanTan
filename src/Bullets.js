@@ -1,12 +1,12 @@
 var types = require("./Types.js");
 
-function CrBullets(InterMap){
+function CrBullets(Commun){
 	var Actor = {
 		bullets: Array.create(),
 		adress: "Bullets"
 	};
 	
-	var Output = InterMap.connect(Input);
+	var Output = Commun.connect(Input);
 
 	
 	function CrBullet(mess){	

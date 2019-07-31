@@ -2,30 +2,40 @@ require("../lib/mof.js");
 
 module.exports = CrClient;
 
-function CrClient(Roter, Ready, Destroy){
+function CrClient(Commun){
 	var bul_adr = "Bullets";
 	var game_mod_adr = "GameMode";
+	var manager_adr = "PlayersManager";
 
 	var GamerData = null;
+
+	var Online = false;
 	
 	
 	var Send = {
 		client: null,
-		map: Roter.connect(Input),
+		def: Commun.connect(Input),
+		map: function(mess){
+			this.def(mess);
+		},
 		bullet: function(mess){
 			mess.adr = bul_adr;
-			this.map(mess);
+			this.def(mess);
 		},
 		mode: function(mess){
 			mess.adr = game_mod_adr;
-			this.map(mess);
+			this.def(mess);
+		},
+		manager: function(mess){
+			mess.adr = manager_adr;
+			this.def(mess);
 		}
 	};
 
 
 	var Gamer = new CrGamer(Send, Death);
 	
-	this.Resp = Resp;
+
 	this.Connect = function(Client){
 		Send.client = Client.connect(InputClient);
 		
@@ -35,42 +45,37 @@ function CrClient(Roter, Ready, Destroy){
 		Send.client({action: "Stat", data: {Status: "Watch other gamers", login: Gamer.login}});
 
 		Send.map({action: "Reg", login: Gamer.login, source: Gamer.adress, adr: game_mod_adr});
-		Send.map({action: "Create", type: "Tiles", source: Gamer.adress, gamer_tile: GamerData.tile});
-		
-		Client.disconnect = Disconnect;
-		Gamer.online = true;
+		Send.map({action: "Create", type: "Tiles", source: Gamer.adress, gamer_tile: GamerData.tile});  
 		
 		return this;
 	};
 
-	function Disconnect(){
-		Off();
-		Send.client = null;
-		Gamer.online = false;
-		Destroy();
-	}
-
-	
-
-	function Death(killer){
-		Off();
-		Gamer.deaths++;
-		Send.mode({
-			action: "Kill",
-			killer: killer,
-			casualty: Gamer.adress
-		});
-		
+	this.Ready = function(){
+		Online = true;
 		Resp();
 	}
 
+	this.Destroy = function(){
+		Off();
+		Online = false;
+	}
+
+	return this;
+
+	
+	function ReadyLoad(mess){
+		Send.manager(mess);
+	}
+	
+
 	function Resp(){
-		if(Gamer.online) Send.map({
+
+		Send.map({
 			action: "Create",
 			type: "Gamer",
 			source: Gamer.adress,
 			box: {w: Gamer.box.w, h: Gamer.box.h},
-			sprite: "tank"
+			sprite: GamerData.tile.id
 		});
 	}
 	
@@ -84,11 +89,24 @@ function CrClient(Roter, Ready, Destroy){
 			source: Gamer.adress,
 		});
 	}
+
+	function Death(killer){
+		Off();
+		Gamer.deaths++;
+		Resp();
+
+		Send.mode({
+			action: "Kill",
+			killer: killer,
+			casualty: Gamer.adress
+		});
+	}
 	
 	
 	function InputClient(mess){
-		console.log(mess);
+		
 		switch(mess.action){
+			case "ReadyLoad": ReadyLoad(mess); break;
 			case "Move": Gamer.new_dir = mess.dir; break;
 			case "Fire": Gamer.press_fire = true; break;
 		}
@@ -103,6 +121,7 @@ function CrClient(Roter, Ready, Destroy){
 
 		if(mess.action == 'Create' && mess.type=='Tiles' &&  mess.source == Gamer.adress){
 			GamerData.tile.id = mess.id_gamer_tile;
+
 			Send.client({
 				action: mess.action,
 				type: mess.type,
@@ -133,7 +152,7 @@ function CrClient(Roter, Ready, Destroy){
 			});
 			
 			Gamer.destroy();
-			Gamer.online = false;
+			Online = false;
 			
 			return;
 		}
@@ -154,7 +173,7 @@ function CrClient(Roter, Ready, Destroy){
 		
 		
 		
-		if(Gamer.is_map){
+		if(Online){
 			delete mess.source;
 			Send.client(mess);
 		}
@@ -165,7 +184,6 @@ function CrClient(Roter, Ready, Destroy){
 
 function CrGamer(Send, Death){
 	var Gamer = {
-		online: false,
 		dir: 0,
 		speed: 7,
 		box: {w: 0.9, h: 0.9},

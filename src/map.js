@@ -1,4 +1,4 @@
-function CrMap(Rout, map){
+function CrMap(Commun, map){
 	var Tiles = Array.create();
 
 	var List = {
@@ -10,7 +10,7 @@ function CrMap(Rout, map){
 	CrMovingLoop(List.Gamer, Move);
 	CrMovingLoop(List.Bullet, MoveBullet);
 	
-	var Output = Rout.connect(Input);
+	var Output = Commun.connect(Input);
 	
 	function Input(mess){
 
@@ -102,7 +102,7 @@ function CrMap(Rout, map){
 			box: mess.box,
 		};
 		
-		
+
 		if(mess.type == "Gamer"){
 			new_mess = CrGamer(new_mess, obj);
 		}
@@ -117,7 +117,6 @@ function CrMap(Rout, map){
 		
 		gamer.pos = {x: +resp.x.toFixed(2), y: +resp.y.toFixed(2)};
 		gamer.dir = 0; //=====================================Resp
-		gamer.sprite += mess.id;
 		
 		
 		mess.pos = gamer.pos;

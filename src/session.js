@@ -1,6 +1,7 @@
 const CrRouting = require("AsynCommun").CrRouter;
-const CrInter = require("AsynCommun").CrCommunicator;
+const CrCommun = require("AsynCommun").CrCommunicator;
 
+const CrResources = require("./Resources.js");
 const CrMap = require("./Map.js");
 const CrBullets = require("./Bullets.js");
 const CrBlocks = require("./Blocks.js");
@@ -12,36 +13,46 @@ function CrSession(GamersData, Map_data, Destroy){
 		max_kills: 5
 	}
 
+//====================InitSession========================
+
 	Map_data.resp = RespMap(Map_data);
 	Map_data.size = Map_data.map.sizes.width;
 
 	var ready = false;
 	
 	var Router = new CrRouting(true);
-	var MapInter = new CrInter();
-	var GameModeInter = new CrInter();
-	var BulletsInter = new CrInter();
-	var BlocksInter = new CrInter();
+	var MapCommun = new CrCommun();
+	var GameModeCommun = new CrCommun();
+	var BulletsCommun = new CrCommun();
+	var BlocksCommun = new CrCommun();
+	var ResourcesCommun = new CrCommun();
+	var PlayersManagerCommun = new CrCommun();
 
-	Router(MapInter, "Default");
-	Router(GameModeInter, "GameMode");
-	Router(BulletsInter, "Bullets");
-	Router(BlocksInter, "Blocks");
+	Router(MapCommun, "Default");
+	Router(GameModeCommun, "GameMode");
+	Router(BulletsCommun, "Bullets");
+	Router(BlocksCommun, "Blocks");
+	Router(PlayersManagerCommun, "PlayersManager");
 
-	CrMap(MapInter , Map_data);
-	CrGameMode(GameModeInter, Param);
-	CrBullets(BulletsInter);
-	CrBlocks(BlocksInter, JSON.stringify(Map_data));
+	CrMap(MapCommun, Map_data);
+	CrGameMode(GameModeCommun, Param);
+	CrBullets(BulletsCommun);
+	CrBlocks(BlocksCommun, JSON.stringify(Map_data));
 	
+//====================PlayersManager===============================
+
+	var Send = PlayersManagerCommun.connect(Input);
+
 	var Gamers = Map_data.resp.map(function(resp, i){
-		var GamerInter = new CrInter();
-		Router(GamerInter, i);
-		return new CrGamer(GamerInter, Ready, DestroyGamer.bind(null, i));
+		var GamerCommun = new CrCommun();
+		Router(GamerCommun, i);
+		return new CrGamer(GamerCommun);
 	});
 	
 	var Len_Gamers = Gamers.length;
 	var Ready_Gamers = 0;
 	var Play_Gamers = 0;
+
 	this.Connect = function(Client){
 
 		Client.data = GamersData[Client.login];
@@ -54,13 +65,22 @@ function CrSession(GamersData, Map_data, Destroy){
 			Client.disconnect({action: "Stat", data: {Status: "Max gamers on map!"}});
 	}
 
+	function Input(mess){
+		switch(mess.action){
+			case "Connect": break;
+			case "ReadyLoad": Ready(mess); break;
+			default: throw new Error(JSON.stringify(mess), "", 4);
+		}
+	}
+
 	function Ready(){
 		Play_Gamers++;
 		if(Play_Gamers === Len_Gamers)
-			Ready_Gamers.forEach(function(Gamer){Gamer.Resp()});
+			Gamers.forEach(function(Gamer){Gamer.Ready()});
 	}
 	
 	function DestroyGamer(index){
+		Ready_Gamers[index].Destroy();
 		delete Ready_Gamers[index];
 		if(ready && Ready_Gamers.every(function(gamer){return !gamer;})) Destroy();
 	}

@@ -73,13 +73,9 @@ function CrDisplay(){
 	return this;
 
 	function InputMess(mess){
+		console.log(mess);
 		switch(mess.action){
-			case "Create": 
-				switch(mess.type){
-					case "Tiles": LoadTiles(mess); break;
-					//default: CrObj(mess); break; 
-				}
-				break;
+			case "Create": CrObj(mess); break;
 			case "Update": UpObj(mess); break;
 			case "Dell": DellObj(mess); break;
 			case "Stat": Stat.write(mess.data); break;
@@ -97,6 +93,7 @@ function CrDisplay(){
 	
 	function CrObj(mess){
 		switch(mess.type){
+			case "Tiles": LoadTiles(mess); break;
 			case "Map": CrMap(mess); break;
 			default : CrElem(mess); break;
 		}
@@ -117,10 +114,9 @@ function CrDisplay(){
 	}
 	
 	function CrElem(mess){
-		
 		size_cof = World.size_cof;
 		
-		var elem = new PIXI.Sprite(textures[mess.sprite].texture);
+		var elem = new PIXI.Sprite(Tiles[mess.sprite].images[0].texture);
 		elem.anchor.set(0.5);
 		
 		elem.x = mess.pos.x * size_cof;
@@ -159,10 +155,10 @@ function CrDisplay(){
 		world.x = (window.innerWidth - window.innerHeight) / 2 ;
 		app.stage.addChild(world);
 		
-		var fon = textures.fon;
+		/*var fon = textures.fon;
 		fon.height = app.screen.height;
 		fon.width =  app.screen.height;
-		world.addChild(fon);
+		world.addChild(fon);*/
 		
 		World = {};
 		World.size_cof = window.innerHeight / mess.size; //Кофф. для перевода коорд. из серверных в дисплейные.
