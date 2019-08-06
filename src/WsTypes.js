@@ -46,19 +46,21 @@ function CrTypesDisplay(){
 		size: T.pos(types.map_size)
 	});
 
-	var CreateObjType = T.obj({
+	var CreateActorType = T.obj({
 		action: "Create",
-		type: T.any("Gamer", "Bullet", "Block"),
+		type: "Actor",
+		actor_type: T.str(/^[\w\d]*$/, 50),
 		id: types.obj_id,
-		sprite: T.str(/^[\w\d]*$/, 50),
+		sprite: types.obj_id,
 		box: types.box,
 		pos: types.position,
 		dir: types.direction
 	});
 
-	var UpdateObjType = T.obj({
+	var UpdateActorType = T.obj({
 		action: "Update",
-		type: T.any("Gamer", "Bullet"),
+		type: "Actor",
+		actor_type: T.str(/^[\w\d]*$/, 50),
 		id: types.obj_id,
 		box: T.any(undefined, types.box),
 		pos: types.position,
@@ -67,7 +69,7 @@ function CrTypesDisplay(){
 
 	var DelObjType = T.obj({
 			action: "Dell",
-			type: T.any("Gamer", "Bullet"),
+			type: "Actor",
 			id: types.obj_id,
 	});
 
@@ -78,10 +80,30 @@ function CrTypesDisplay(){
 			size: T.pos(types.map_size)
 	});
 
-	var CrTilesType = T.obj({
+	var AddTileType = T.obj({
+		action: "Add",
+		type: "Tiles",
+		tile: TileType
+	});
+
+	var TilesType = T.obj({
 		action: "Create",
 		type: "Tiles",
 		tiles: T.arr(TileType, 64, false)
+	});
+
+	var UpdateGUIStatus = T.obj({
+		action: "Update", 
+		type: "GUI", 
+		data: T.any({
+			Status: T.str(/^[\w\d\s]*$/, 50), 
+			login: T.str(/^[\w\d]*$/, 50),
+		},{
+			"Status": "Play",
+            "life": T.pos(1024),
+            "deaths": T.pos(1024),
+            "kills": T.pos(1024)
+		})
 	});
 
 	// var DelMapType = T.obj({
@@ -90,15 +112,47 @@ function CrTypesDisplay(){
 	// });
 
 	return function(mess){
-		if(mess.type == "Map" && mess.action == "Create")
+		switch(mess.type){
+			case "Map":
+				switch(mess.action){
+					case "Create": ValidError(CreateMapType.test, mess); break;
+					default: ValidDefault(mess);
+				} break;
+			case "GUI":
+				switch(mess.action){
+					case "Update": ValidError(UpdateGUIStatus.test, mess); break;
+					default: ValidDefault(mess);
+				} break;
+			case "Tiles":
+				switch(mess.action){
+					case "Create": ValidError(TilesType.test, mess); break;
+					case "Add": ValidError(AddTileType.test, mess); break;
+					default: ValidDefault(mess);
+				} break;
+			case "Actor":
+				switch(mess.action){
+					case "Create": ValidError(CreateActorType.test, mess); break;
+					case "Update": ValidError(UpdateActorType.test, mess); break;
+					default: ValidDefault(mess);
+				} break;
+			default: ValidDefault(mess);
+		}
+
+		/*if(mess.type == "Map" && mess.action == "Create")
 			ValidError(CreateMapType.test, mess);
 		else
 			switch(mess.action){
-				case "Create":
-
+				case "Update":
 					switch(mess.type){
-						case "Tiles": ValidError(CrTilesType.test, mess); break;
-						//default: ValidError(CreateObjType.test, mess); break; 
+						case "GUI": ValidError(UpdateGUIStatus.test, mess); break;
+						default: ValidDefault(mess);
+					}
+					break;
+				case "Create":
+					switch(mess.type){
+						case "Tiles": ValidError(TilesType.test, mess); break;
+						case "Gamer": ValidError(CreateObjType.test, mess); break;
+						default: ValidDefault(mess);
 					}
 					break;
 
@@ -108,7 +162,8 @@ function CrTypesDisplay(){
 				case "Dell":
 					ValidError(DelObjType.test, mess); 
 					break;
-			}
+				default: ValidDefault(mess);
+			}*/
 		return mess;
 	}
 }

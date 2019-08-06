@@ -9,6 +9,7 @@ function CrClient(Commun){
 
 	var GamerData = null;
 
+	var ReadyTiles = false;
 	var Online = false;
 	
 	
@@ -35,17 +36,35 @@ function CrClient(Commun){
 
 	var Gamer = new CrGamer(Send, Death);
 	
-
+	this.Input = Input;
 	this.Connect = function(Client){
 		Send.client = Client.connect(InputClient);
 		
 		GamerData = Client.data;
 
 		Gamer.login = Client.login;
-		Send.client({action: "Stat", data: {Status: "Watch other gamers", login: Gamer.login}});
+		Send.client({
+			action: "Update", 
+			type: "GUI", 
+			data: {
+				Status: "Watch other gamers", 
+				login: Gamer.login
+			}
+		});
 
-		Send.map({action: "Reg", login: Gamer.login, source: Gamer.adress, adr: game_mod_adr});
-		Send.map({action: "Create", type: "Tiles", source: Gamer.adress, gamer_tile: GamerData.tile});  
+		Send.map({
+			action: "Reg", 
+			login: Gamer.login, 
+			source: Gamer.adress, 
+			adr: game_mod_adr
+		});
+
+		Send.map({
+			action: "Create", 
+			type: "Tiles", 
+			source: Gamer.adress, 
+			gamer_tile: GamerData.tile
+		});  
 		
 		return this;
 	};
@@ -64,7 +83,11 @@ function CrClient(Commun){
 
 	
 	function ReadyLoad(mess){
-		Send.manager(mess);
+		Send.manager({
+			action: "Ready",
+			type: "Gamer",
+			id: Gamer.adress,
+		});
 	}
 	
 
@@ -104,9 +127,8 @@ function CrClient(Commun){
 	
 	
 	function InputClient(mess){
-		
 		switch(mess.action){
-			case "ReadyLoad": ReadyLoad(mess); break;
+			case "ReadyLoad": ReadyLoad(); break;
 			case "Move": Gamer.new_dir = mess.dir; break;
 			case "Fire": Gamer.press_fire = true; break;
 		}
@@ -127,6 +149,13 @@ function CrClient(Commun){
 				type: mess.type,
 				tiles: mess.tiles
 			});
+
+			ReadyTiles = true;
+		}
+
+		if(mess.action == 'Add' && mess.type =='Tiles' && ReadyTiles && !Online){
+			delete mess.source;
+			Send.client(mess);
 		}
 		
 		if(mess.action == "Damage"){
@@ -164,7 +193,8 @@ function CrClient(Commun){
 			}
 		}
 		
-		if(mess.type == 'Gamer' && mess.source == Gamer.adress){
+		if(mess.actor_type == 'Gamer' && mess.source == Gamer.adress){
+
 			switch(mess.action){
 				case "Create": Gamer.init(mess); break;
 				case "Update": Gamer.update(mess); break;
@@ -218,7 +248,8 @@ function CrGamer(Send, Death){
 
 	Gamer.upStat = function(){
 		Send.client({
-			action: "Stat", 
+			action: "Update",
+			type: "GUI", 
 			data: {
 				Status: "Play",
 				life: this.life,

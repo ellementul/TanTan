@@ -54,27 +54,47 @@ function CrSession(GamersData, Map_data, Destroy){
 	var Play_Gamers = 0;
 
 	this.Connect = function(Client){
+		console.info("Connecting gamer...");
 
 		Client.data = GamersData[Client.login];
 		
 		if(Len_Gamers !== Ready_Gamers){
 			Gamers[Ready_Gamers].Connect(Client);
 			Ready_Gamers++;
+
+			console.info("Connected " + Client.login);
 		}
 		else 
 			Client.disconnect({action: "Stat", data: {Status: "Max gamers on map!"}});
 	}
 
 	function Input(mess){
-		switch(mess.action){
-			case "Connect": break;
-			case "ReadyLoad": Ready(mess); break;
+		if(mess.action == "Connect")
+			return;
+
+		switch(mess.type){
+			case "Tiles":  TilesInput(mess); break;
+			case "Gamer": GamersInput(mess); break;
+			case "Actor": SendPlayers(mess); break;
 			default: throw new Error(JSON.stringify(mess), "", 4);
 		}
 	}
 
-	function Ready(){
+	function GamersInput(mess){
+		switch(mess.action){
+			case "Ready":  Ready(mess); break;
+			default: throw new Error(JSON.stringify(mess), "", 4);
+		}
+	}
+
+	function TilesInput(mess){
+		SendPlayers(mess);
+	}
+
+	function Ready(mess){
 		Play_Gamers++;
+		console.info("Gamer N" + mess.id + " is ready.");
+
 		if(Play_Gamers === Len_Gamers)
 			Gamers.forEach(function(Gamer){Gamer.Ready()});
 	}
@@ -83,6 +103,14 @@ function CrSession(GamersData, Map_data, Destroy){
 		Ready_Gamers[index].Destroy();
 		delete Ready_Gamers[index];
 		if(ready && Ready_Gamers.every(function(gamer){return !gamer;})) Destroy();
+	}
+
+	function SendPlayers(mess){
+		 Gamers.every(SendPlayer.bind(null, mess));
+	}
+
+	function SendPlayer(mess, player){
+		player.Input(mess);
 	}
 	
 }

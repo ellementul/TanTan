@@ -48,21 +48,6 @@ function CrDisplay(){
 		ReadyTiles();
 	}
 	
-	/*PIXI.loader.add('img/fon.svg')
-	.add('img/green_tank.png')
-	.add('img/yellow_tank.png')
-	.add('img/block.jpg')
-	.add('img/bullet.svg')
-	.load(function(loader, resources){
-		textures.fon = new PIXI.Sprite(resources['img/fon.svg'].texture);
-		textures.tank0 = new PIXI.Sprite(resources['img/green_tank.png'].texture);
-		textures.tank1 = new PIXI.Sprite(resources['img/yellow_tank.png'].texture);
-		textures.block = new PIXI.Sprite(resources['img/block.jpg'].texture);
-		textures.bullet = new PIXI.Sprite(resources['img/bullet.svg'].texture);
-		Input.take(InputMess);
-		Input = InputMess;
-	}); */
-	
 
 //==================INPUT===============	
 	
@@ -74,11 +59,36 @@ function CrDisplay(){
 
 	function InputMess(mess){
 		console.log(mess);
+		switch(mess.type){
+			case "Actor": InputActors(mess); break;
+			case "GUI": UpdateGUI(mess); break;
+			case "Tiles":  InputTiles(mess); break;
+			case "Map":  InputMap(mess); break;
+			default: console.error("Mess of Unknowed type", mess); 
+		}
+	}
+
+	function InputTiles(mess){
+		switch(mess.action){
+			case "Create":  LoadTiles(mess); break;
+			case "Add": AddTile(mess.tile); break;
+			default: console.error("Mess of Unknowed action", mess);
+		}
+	}
+
+	function InputMap(mess){
+		switch(mess.action){
+			case "Create":  CrMap(mess); break;
+			default: console.error("Mess of Unknowed action", mess);
+		}
+	}
+
+	function InputActors(mess){
 		switch(mess.action){
 			case "Create": CrObj(mess); break;
 			case "Update": UpObj(mess); break;
 			case "Dell": DellObj(mess); break;
-			case "Stat": Stat.write(mess.data); break;
+			default: console.error("Mess of Unknowed action", mess);
 		}
 	}
 
@@ -87,6 +97,10 @@ function CrDisplay(){
 			action: "ReadyLoad",
 			type: "Tiles"
 		});
+	}
+
+	function UpdateGUI(mess){
+		Stat.write(mess.data);
 	}
 
 //===============Objects==================
@@ -129,17 +143,17 @@ function CrDisplay(){
 		
 		World.add(elem);
 		
-		if(!List[mess.type]) List[mess.type] = [];
-		List[mess.type][mess.id] = elem;
+		if(!List[mess.actor_type]) List[mess.actor_type] = [];
+		List[mess.actor_type][mess.id] = elem;
 	}
 	
 	function DellElem(mess){
-		List[mess.type][mess.id].destroy();
-		List[mess.type][mess.id] = undefined;
+		List[mess.actor_type][mess.id].destroy();
+		List[mess.actor_type][mess.id] = undefined;
 	}
 	
 	function UpdateElem(mess){
-		var elem = List[mess.type][mess.id];
+		var elem = List[mess.actor_type][mess.id];
 		
 		if(mess.pos){
 			elem.x = mess.pos.x * World.size_cof;

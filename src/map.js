@@ -13,6 +13,7 @@ function CrMap(Commun, map){
 	var Output = Commun.connect(Input);
 	
 	function Input(mess){
+		if(mess.action == 'Connect') return;
 
 		switch(mess.type){
 			case "Tiles":
@@ -51,8 +52,16 @@ function CrMap(Commun, map){
 //==============TILES=================
 	
 	function LoadTiles(mess){
-		var id = Tiles.add(mess.gamer_tile);
-		mess.gamer_tile.id = id;
+		var tile = mess.gamer_tile;
+		var id = Tiles.add(tile);
+		tile.id = id;
+
+		sendAllGamers({
+			action: "Add",
+			type: "Tiles",
+			tile: tile,
+			source: mess.source
+		});
 
 		Output({
 			action: "Create",
@@ -67,12 +76,8 @@ function CrMap(Commun, map){
 //==============GAMERS================
 	
 	function sendAllGamers(new_mess){
-		List["Gamer"].forEach(function(gamer){
-			if(gamer){
-				new_mess.adr = gamer.source;
-				Output(Object.assign({}, new_mess));
-			}
-		});
+		new_mess.adr = "PlayersManager";
+		Output(new_mess);
 	}
 
 	function CrObj(mess){
@@ -96,13 +101,13 @@ function CrMap(Commun, map){
 		
 		var new_mess = {
 			action: "Create",
-			type: obj.type,
+			type: "Actor",
+			actor_type: mess.type,
 			id: obj.id,
 			sprite: obj.sprite,
 			box: mess.box,
 		};
 		
-
 		if(mess.type == "Gamer"){
 			new_mess = CrGamer(new_mess, obj);
 		}
@@ -148,7 +153,8 @@ function CrMap(Commun, map){
 		Objs.forEach(function(obj){
 			if(obj) Output({
 				action: "Create",
-				type: obj.type,
+				type: "Actor",
+				actor_type: obj.type,
 				id: obj.id,
 				box: obj.box,
 				pos: {x: +obj.pos.x.toFixed(2), y: +obj.pos.y.toFixed(2)},
@@ -189,7 +195,8 @@ function CrMap(Commun, map){
 		
 		var new_mess = {
 			action: "Update",
-			type: obj.type,
+			type: "Actor",
+			actor_type: obj.type,
 			id: obj.id,
 			pos: {x: +obj.pos.x.toFixed(2), y: +obj.pos.y.toFixed(2)},
 			dir: obj.dir,
@@ -223,7 +230,8 @@ function CrMap(Commun, map){
 				
 				var new_mess = {
 					action: "Update",
-					type: obj.type,
+					type: "Actor",
+					actor_type: obj.type,
 					id: obj.id,
 					pos: {x: +obj.pos.x.toFixed(2), y: +obj.pos.y.toFixed(2)},
 					dir: obj.dir,
