@@ -77,6 +77,7 @@ function CrMap(Commun, map){
 	
 	function sendAllGamers(new_mess){
 		new_mess.adr = "PlayersManager";
+		console.log(new_mess);
 		Output(new_mess);
 	}
 
@@ -160,7 +161,6 @@ function CrMap(Commun, map){
 				pos: {x: +obj.pos.x.toFixed(2), y: +obj.pos.y.toFixed(2)},
 				dir: obj.dir,
 				sprite: obj.sprite,
-				source: obj.source,
 				adr: adr
 			});
 		});

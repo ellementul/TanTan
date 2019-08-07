@@ -72,6 +72,7 @@ function CrClient(Commun){
 	this.Ready = function(){
 		Online = true;
 		Resp();
+		console.info("Gamer N" + Gamer.adress + " is playing.");
 	}
 
 	this.Destroy = function(){
@@ -136,6 +137,7 @@ function CrClient(Commun){
 	
 	
 	function Input(mess){
+
 		if(mess.action == 'Connect'){
 			Gamer.adress = mess.adress;
 			return;
@@ -154,8 +156,9 @@ function CrClient(Commun){
 		}
 
 		if(mess.action == 'Add' && mess.type =='Tiles' && ReadyTiles && !Online){
-			delete mess.source;
-			Send.client(mess);
+			var new_mess = Object.assign({}, mess);
+			delete new_mess.source;
+			Send.client(new_mess);
 		}
 		
 		if(mess.action == "Damage"){
@@ -193,8 +196,8 @@ function CrClient(Commun){
 			}
 		}
 		
-		if(mess.actor_type == 'Gamer' && mess.source == Gamer.adress){
 
+		if(mess.actor_type == 'Gamer' && mess.source === Gamer.adress){
 			switch(mess.action){
 				case "Create": Gamer.init(mess); break;
 				case "Update": Gamer.update(mess); break;
@@ -202,10 +205,10 @@ function CrClient(Commun){
 		}
 		
 		
-		
 		if(Online){
-			delete mess.source;
-			Send.client(mess);
+			var new_mess = Object.assign({}, mess);
+			delete new_mess.source;
+			Send.client(new_mess);
 		}
 	}
 	
@@ -227,6 +230,7 @@ function CrGamer(Send, Death){
 	CrDir(Gamer);
 
 	Gamer.init = function(mess){
+
 		this.pos = {x: mess.pos.x, y: mess.pos.y};
 		this.id = mess.id;
 		this.dir = mess.dir;

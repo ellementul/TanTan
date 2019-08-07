@@ -1,0 +1,15 @@
+E:\проекты\TanTan\src\session.js:79
+			default: throw new Error(JSON.stringify(mess), "", 4);
+			         ^
+
+Error: {"action":"Create","type":"Bullet","id":0,"sprite":"bullet","box":{"w":0.3,"h":0.3},"pos":{"x":5.39,"y":3.41},"dir":0}
+    at Input (E:\проекты\TanTan\src\session.js:79:19)
+    at Array.PlayersManager (E:\проекты\TanTan\node_modules\AsynCommun\TwoFlow.js:34:4)
+    at Input (E:\проекты\TanTan\node_modules\AsynCommun\Router.js:25:16)
+    at sendAllGamers (E:\проекты\TanTan\src\Map.js:81:3)
+    at CrBullet (E:\проекты\TanTan\src\Map.js:273:3)
+    at Input (E:\проекты\TanTan\src\Map.js:26:21)
+    at Array.Default (E:\проекты\TanTan\node_modules\AsynCommun\TwoFlow.js:34:4)
+    at Input (E:\проекты\TanTan\node_modules\AsynCommun\Router.js:25:16)
+    at CrBullet (E:\проекты\TanTan\src\Bullets.js:54:3)
+    at Input (E:\проекты\TanTan\src\Bullets.js:79:17)

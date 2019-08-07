@@ -106,10 +106,11 @@ function CrSession(GamersData, Map_data, Destroy){
 	}
 
 	function SendPlayers(mess){
-		 Gamers.every(SendPlayer.bind(null, mess));
+		Object.freeze(mess);
+		Gamers.forEach(SendPlayer.bind(null, mess));
 	}
 
-	function SendPlayer(mess, player){
+	function SendPlayer(mess, player, i){
 		player.Input(mess);
 	}
 	
