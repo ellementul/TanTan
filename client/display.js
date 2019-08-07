@@ -58,7 +58,6 @@ function CrDisplay(){
 	return this;
 
 	function InputMess(mess){
-		console.log(mess);
 		switch(mess.type){
 			case "Actor": InputActors(mess); break;
 			case "GUI": UpdateGUI(mess); break;
@@ -96,6 +95,13 @@ function CrDisplay(){
 		this.output({
 			action: "ReadyLoad",
 			type: "Tiles"
+		});
+	}
+
+	function ReadyMap(){
+		this.output({
+			action: "ReadyLoad",
+			type: "Map"
 		});
 	}
 
@@ -169,11 +175,6 @@ function CrDisplay(){
 		world.x = (window.innerWidth - window.innerHeight) / 2 ;
 		app.stage.addChild(world);
 		
-		/*var fon = textures.fon;
-		fon.height = app.screen.height;
-		fon.width =  app.screen.height;
-		world.addChild(fon);*/
-		
 		World = {};
 		World.size_cof = window.innerHeight / mess.size; //Кофф. для перевода коорд. из серверных в дисплейные.
 		World.add = function(obj){
@@ -183,6 +184,8 @@ function CrDisplay(){
 			world.destroy();
 			World = null;
 		}
+		
+		ReadyMap();
 	}
 	
 	

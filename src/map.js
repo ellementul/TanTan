@@ -19,6 +19,12 @@ function CrMap(Commun, map){
 			case "Tiles":
 				switch(mess.action){
 					case "Create": LoadTiles(mess); break;
+					case "Add": AddTile(mess); break;
+				} 
+				break;
+			case "Map":
+				switch(mess.action){
+					case "Create": loadMap(mess); break;
 				} 
 				break;
 			case "Bullet": 
@@ -42,33 +48,35 @@ function CrMap(Commun, map){
 	
 	
 	
-	function DellObj(mess){
-		
-		sendAllGamers(mess);
-		if(mess.type == "Gamer") DellGamer(mess);
-		List[mess.type].dell(mess.id);
-	}
+	
 
 //==============TILES=================
-	
-	function LoadTiles(mess){
-		var tile = mess.gamer_tile;
+	function AddTile(mess){
+		var tile = mess.tile;
 		var id = Tiles.add(tile);
 		tile.id = id;
+
+		Output({
+			action: "Add",
+			type: "Tiles",
+			tile_type: mess.tile_type,
+			tile_id: tile.id,
+			adr: mess.source
+		});
 
 		sendAllGamers({
 			action: "Add",
 			type: "Tiles",
-			tile: tile,
-			source: mess.source
+			tile: tile
 		});
+	}
+	
+	function LoadTiles(mess){
 
 		Output({
 			action: "Create",
 			type: "Tiles",
 			tiles: Tiles.concat(),
-			id_gamer_tile: id,
-			source: mess.source,
 			adr: mess.source
 		});
 	}
@@ -77,7 +85,6 @@ function CrMap(Commun, map){
 	
 	function sendAllGamers(new_mess){
 		new_mess.adr = "PlayersManager";
-		console.log(new_mess);
 		Output(new_mess);
 	}
 
@@ -115,9 +122,23 @@ function CrMap(Commun, map){
 		
 		sendAllGamers(new_mess);
 	}
+
+	function DellObj(mess){
+
+		var new_mess = {
+			action: "Dell",
+			type: "Actor", 
+			actor_type: mess.type, 
+			id: mess.id
+		}
+		
+		sendAllGamers(new_mess);
+
+		if(mess.type == "Gamer") DellGamer(mess);
+		List[mess.type].dell(mess.id);
+	}
 	
 	function CrGamer(mess, gamer){
-		loadMap(gamer.id, gamer.source);
 		
 		var resp = map.resp[gamer.id][0];
 		
@@ -129,25 +150,37 @@ function CrMap(Commun, map){
 		mess.dir = gamer.dir;
 		mess.sprite = gamer.sprite;
 		mess.source = gamer.source;
+
+		SendGamer(mess);
 		
 		return mess;
 	}
-	
-	function DellGamer(mess){
-		Output({action: "Dell", type: "Map", adr: mess.source});
+
+	function SendGamer(mess){
+		var new_mess = Object.assign({}, mess);
+		new_mess.type = "Gamer";
+		new_mess.adr = new_mess.source;
+		Output(new_mess);
 	}
 	
-	function loadMap(id, adr){
+	function DellGamer(mess){
+
+	}
+	
+	function loadMap(mess){
 		var Gamers = List["Gamer"].concat();
 		var Blocks = List["Block"].concat();
-
 		
-		
-		Output({action: "Create", type: "Map", size: map.size, adr: adr});
-		loadBlocks(Blocks, adr);
+		Output({
+			action: "Create", 
+			type: "Map", 
+			size: map.size, 
+			adr: mess.source
+		});
 
-		Gamers[id] = null;
-		loadGamers(Gamers, adr);
+		loadBlocks(Blocks, mess.source);
+
+		loadGamers(Gamers, mess.source);
 	}
 	
 	function loadGamers(Objs, adr){
@@ -203,6 +236,9 @@ function CrMap(Commun, map){
 			source: obj.source
 		};
 		
+		if(obj.type == "Gamer")
+			SendGamer(new_mess);
+		
 		sendAllGamers(new_mess);
 	}
 
@@ -234,9 +270,11 @@ function CrMap(Commun, map){
 					actor_type: obj.type,
 					id: obj.id,
 					pos: {x: +obj.pos.x.toFixed(2), y: +obj.pos.y.toFixed(2)},
-					dir: obj.dir,
-					source: obj.source
+					dir: obj.dir
 				};
+
+				if(obj.type == "Gamer")
+					SendGamer(new_mess);
 				
 				sendAllGamers(new_mess);
 			}
@@ -262,7 +300,8 @@ function CrMap(Commun, map){
 
 		var new_mess = {
 			action: "Create",
-			type: "Bullet",
+			type: "Actor",
+			actor_type: "Bullet",
 			id: bull.id,
 			sprite: bull.sprite,
 			box: {w: bull.box.w, h: bull.box.h},
@@ -290,7 +329,8 @@ function CrMap(Commun, map){
 		if(!collisBullet(bull, bull.pos))
 			sendAllGamers({
 				action: "Update",
-				type: "Bullet",
+				type: "Actor",
+				actor_type: "Bullet",
 				id: bull.id,
 				box: {w: bull.box.w, h: bull.box.h},
 				pos: {x: +bull.pos.x.toFixed(2), y: +bull.pos.y.toFixed(2)},

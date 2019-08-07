@@ -24,6 +24,7 @@ function CrGameMode(Router, Param){
 		List_Adr[mess.casualty].deaths++;
 		Output({
 			action: "Kill",
+			type: "Gamer",
 			adr: mess.killer
 		});
 		
@@ -37,6 +38,7 @@ function CrGameMode(Router, Param){
 			if(gamer){
 				Output({
 					action: (i == winner)? "Win" : "Lose",
+					type: "Gamer",
 					winner:  win_login,
 					adr: i
 				});

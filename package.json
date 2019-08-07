@@ -1,6 +1,6 @@
 {
   "name": "tanki",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "2D Shooter Game",
   "main": "./server/main.js",
   "scripts": {

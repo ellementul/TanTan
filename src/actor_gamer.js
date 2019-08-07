@@ -1,3 +1,5 @@
+"use strict";
+
 require("../lib/mof.js");
 
 module.exports = CrClient;
@@ -9,8 +11,9 @@ function CrClient(Commun){
 
 	var GamerData = null;
 
-	var ReadyTiles = false;
-	var Online = false;
+	var IsReadyTiles = false;
+	var IsMap = false;
+	var IsPlay = false; 
 	
 	
 	var Send = {
@@ -62,34 +65,32 @@ function CrClient(Commun){
 		Send.map({
 			action: "Create", 
 			type: "Tiles", 
-			source: Gamer.adress, 
-			gamer_tile: GamerData.tile
+			source: Gamer.adress
+		});
+
+		Send.map({
+			action: "Add", 
+			type: "Tiles",
+			tile_type: "Gamer",
+			tile: GamerData.tile,
+			source: Gamer.adress,
 		});  
 		
 		return this;
 	};
 
 	this.Ready = function(){
-		Online = true;
 		Resp();
 		console.info("Gamer N" + Gamer.adress + " is playing.");
 	}
 
 	this.Destroy = function(){
 		Off();
-		Online = false;
 	}
 
 	return this;
 
-	
-	function ReadyLoad(mess){
-		Send.manager({
-			action: "Ready",
-			type: "Gamer",
-			id: Gamer.adress,
-		});
-	}
+
 	
 
 	function Resp(){
@@ -101,6 +102,8 @@ function CrClient(Commun){
 			box: {w: Gamer.box.w, h: Gamer.box.h},
 			sprite: GamerData.tile.id
 		});
+
+		IsPlay = true;
 	}
 	
 	function Off(){
@@ -112,6 +115,8 @@ function CrClient(Commun){
 			id: Gamer.id,
 			source: Gamer.adress,
 		});
+
+		IsPlay = false;
 	}
 
 	function Death(killer){
@@ -129,10 +134,37 @@ function CrClient(Commun){
 	
 	function InputClient(mess){
 		switch(mess.action){
-			case "ReadyLoad": ReadyLoad(); break;
-			case "Move": Gamer.new_dir = mess.dir; break;
-			case "Fire": Gamer.press_fire = true; break;
+			case "ReadyLoad": ReadyLoad(mess); break;
+			case "Move": if(IsPlay) Gamer.new_dir = mess.dir; break;
+			case "Fire": if(IsPlay) Gamer.press_fire = true; break;
 		}
+	}
+
+	function ReadyLoad(mess){
+		switch(mess.type){
+			case "Tiles": ReadyTiles(mess); break;
+			case "Map": ReadyMap(mess); break;
+		}
+	}
+
+	function ReadyTiles(mess){
+		Send.map({
+			action: "Create", 
+			type: "Map", 
+			source: Gamer.adress
+		});
+	}
+
+	function ReadyMap(mess){
+		ReadyGamer();
+	}
+
+	function ReadyGamer(){
+		Send.manager({
+			action: "Ready",
+			type: "Gamer",
+			id: Gamer.adress,
+		});
 	}
 	
 	
@@ -143,76 +175,94 @@ function CrClient(Commun){
 			return;
 		}
 
-		if(mess.action == 'Create' && mess.type=='Tiles' &&  mess.source == Gamer.adress){
-			GamerData.tile.id = mess.id_gamer_tile;
+		switch(mess.type){
+			case "Tiles": TilesInput(mess); break;
+			case "Map": MapInput(mess); break;
+			case "Gamer": GamerInput(mess); break;
+			case "Actor": ActorInput(mess); break;
+			default: console.error("Unknown message: ", mess);
+		}
+		
+	}
 
-			Send.client({
-				action: mess.action,
-				type: mess.type,
-				tiles: mess.tiles
-			});
+	function TilesInput(mess){
+		switch(mess.action){
+			case "Create": 
+				Send.client({
+					action: mess.action,
+					type: mess.type,
+					tiles: mess.tiles
+				});
 
-			ReadyTiles = true;
+				IsReadyTiles = true;
+				break;
+			case "Add": AddTile(mess); break;
+			default: console.error("Unknown message: ", mess);
 		}
 
-		if(mess.action == 'Add' && mess.type =='Tiles' && ReadyTiles && !Online){
-			var new_mess = Object.assign({}, mess);
-			delete new_mess.source;
-			Send.client(new_mess);
+	}
+
+	function MapInput(mess){
+		switch(mess.action){
+			case "Create": IsMap = true; break;
+			case "Dell": IsMap = false; break;
 		}
+
+		if(IsReadyTiles) 
+			Send.client(mess);
+		else throw new Error();
+	}
+
+	function GamerInput(mess){
 		
-		if(mess.action == "Damage"){
-			Gamer.damage(mess);
-			return;
+		switch(mess.action){
+			case "Create": Gamer.init(mess); break;
+			case "Update": Gamer.update(mess); break;
+			case "Damage": Gamer.damage(mess); break;
+			case "Kill": Gamer.kills++; break;
+			case "Win":
+			case "Lose": EndGame(mess); break;
 		}
-		
-		if(mess.action == "Kill"){
-			Gamer.kills++; 
-			return;
-		}
-		
-		if(mess.action == "Win" || mess.action == "Lose"){
-			Send.client({
-				action: "Stat", 
-				data: {
-					Status: mess.action,
-					Winner: mess.winner,
-					life: Gamer.life,
-					deaths: Gamer.deaths,
-					kills: Gamer.kills
-				}
-			});
-			
-			Gamer.destroy();
-			Online = false;
-			
-			return;
-		}
-		
-		if(mess.type == "Map"){
-			switch(mess.action){
-				case "Create": Gamer.is_map = true; break;
-				case "Dell": Gamer.is_map = false; break;
+	}
+
+	function EndGame(mess){
+		Send.client({
+			action: "Update",
+			type: "GUI", 
+			data: {
+				Status: mess.action,
+				Winner: mess.winner,
+				life: Gamer.life,
+				deaths: Gamer.deaths,
+				kills: Gamer.kills
 			}
-		}
+		});
 		
+		Gamer.destroy();
+		IsPlay = false;
+	}
 
-		if(mess.actor_type == 'Gamer' && mess.source === Gamer.adress){
-			switch(mess.action){
-				case "Create": Gamer.init(mess); break;
-				case "Update": Gamer.update(mess); break;
-			}
-		}
+	function ActorInput(mess){
 		
-		
-		if(Online){
+		if(IsMap){
 			var new_mess = Object.assign({}, mess);
 			delete new_mess.source;
 			Send.client(new_mess);
 		}
 	}
 	
-	
+	function AddTile(mess){
+		if(mess.tile_type == "Gamer"){
+			GamerData.tile.id = mess.tile_id;
+			return;
+		}
+
+		if(IsReadyTiles){
+			var new_mess = Object.assign({}, mess);
+			delete new_mess.source;
+			Send.client(new_mess);
+		}
+	}
 }
 
 function CrGamer(Send, Death){
@@ -265,7 +315,6 @@ function CrGamer(Send, Death){
 	
 	
 	Gamer.scan = function(){
-		
 		if(this.is_changed || this.move){
 			this.updateDir();
 

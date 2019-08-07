@@ -7,7 +7,7 @@ var types = require("./Types.js");
 function CrTypesKeyboard(){
 	var TypeReadyTiles = T.obj({
 		action: "ReadyLoad",
-		type: "Tiles"
+		type: T.any("Tiles", "Map")
 	});
 
 	var TypeWalk = T.obj({
@@ -67,9 +67,10 @@ function CrTypesDisplay(){
 		dir: types.direction
 	});
 
-	var DelObjType = T.obj({
+	var DelActorType = T.obj({
 			action: "Dell",
 			type: "Actor",
+			actor_type: T.str(/^[\w\d]*$/, 50),
 			id: types.obj_id,
 	});
 
@@ -99,10 +100,11 @@ function CrTypesDisplay(){
 			Status: T.str(/^[\w\d\s]*$/, 50), 
 			login: T.str(/^[\w\d]*$/, 50),
 		},{
-			"Status": "Play",
-            "life": T.pos(1024),
-            "deaths": T.pos(1024),
-            "kills": T.pos(1024)
+			Status: T.any("Play", "Win", "Lose"),
+			Winner: T.any(undefined, T.str(/^[\w\d]*$/, 50)),
+            life: T.pos(1024),
+            deaths: T.pos(1024),
+            kills: T.pos(1024)
 		})
 	});
 
@@ -133,37 +135,12 @@ function CrTypesDisplay(){
 				switch(mess.action){
 					case "Create": ValidError(CreateActorType.test, mess); break;
 					case "Update": ValidError(UpdateActorType.test, mess); break;
+					case "Dell": ValidError(DelActorType.test, mess); break;
 					default: ValidDefault(mess);
 				} break;
 			default: ValidDefault(mess);
 		}
-
-		/*if(mess.type == "Map" && mess.action == "Create")
-			ValidError(CreateMapType.test, mess);
-		else
-			switch(mess.action){
-				case "Update":
-					switch(mess.type){
-						case "GUI": ValidError(UpdateGUIStatus.test, mess); break;
-						default: ValidDefault(mess);
-					}
-					break;
-				case "Create":
-					switch(mess.type){
-						case "Tiles": ValidError(TilesType.test, mess); break;
-						case "Gamer": ValidError(CreateObjType.test, mess); break;
-						default: ValidDefault(mess);
-					}
-					break;
-
-				case "Update":
-					ValidError(UpdateObjType.test, mess);
-					break;
-				case "Dell":
-					ValidError(DelObjType.test, mess); 
-					break;
-				default: ValidDefault(mess);
-			}*/
+		
 		return mess;
 	}
 }

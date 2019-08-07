@@ -1,5 +1,7 @@
 var types = require("./Types.js");
 
+var bullets_data = require("./bullet.json");
+
 function CrBullets(Commun){
 	var Actor = {
 		bullets: Array.create(),
@@ -8,6 +10,13 @@ function CrBullets(Commun){
 	
 	var Output = Commun.connect(Input);
 
+	Output({
+		action: "Add",
+		type: "Tiles",
+		tile_type: "Bullet",
+		tile: bullets_data.Bullet.tile,
+		source: Actor.adress
+	});
 	
 	function CrBullet(mess){	
 		
@@ -43,7 +52,7 @@ function CrBullets(Commun){
 			bull: {
 				id: bull.id,
 				source: Actor.adress,
-				sprite: "bullet",
+				sprite: Actor.tile_id,
 				dir: bull.dir,
 				box: Object.assign({}, bull.box),
 				pos: {x: +bull.pos.x.toFixed(2), y: +bull.pos.y.toFixed(2)},
@@ -55,7 +64,7 @@ function CrBullets(Commun){
 	}
 	
 	function DellBull(mess){
-		Output({action: "Dell", type: "Bullet", id: mess.id, type: "Bullet"});
+		Output({action: "Dell", type: "Bullet", id: mess.id});
 		Actor.bullets.dell(mess.id);
 	}
 	
@@ -75,6 +84,12 @@ function CrBullets(Commun){
 
 	
 	function Input(mess){
+		switch(mess.type){
+			case "Tiles": 
+				switch(mess.action){
+					case "Add": Actor.tile_id = mess.tile_id; break;
+				} break;
+		}
 		switch(mess.action){
 			case "Fire": CrBullet(mess); break;
 			case "Collision": Collision(mess); break;
