@@ -1,7 +1,7 @@
 const CrRouting = require("AsynCommun").CrRouter;
 const CrCommun = require("AsynCommun").CrCommunicator;
 
-const CrResources = require("./Resources.js");
+const CrResources = require("ResCat.js");
 const CrMap = require("./Map.js");
 const CrBullets = require("./Bullets.js");
 const CrBlocks = require("./Blocks.js");
@@ -20,7 +20,7 @@ function CrSession(GamersData, Map_data, Destroy){
 
 	var ready = false;
 	
-	var Router = new CrRouting(true);
+	var Router = new CrRouting();
 	var MapCommun = new CrCommun();
 	var GameModeCommun = new CrCommun();
 	var BulletsCommun = new CrCommun();
@@ -32,12 +32,16 @@ function CrSession(GamersData, Map_data, Destroy){
 	Router(GameModeCommun, "GameMode");
 	Router(BulletsCommun, "Bullets");
 	Router(BlocksCommun, "Blocks");
+	Router(ResourcesCommun, "Resources");
 	Router(PlayersManagerCommun, "PlayersManager");
+
+	const resources = new CrResources();
 
 	CrMap(MapCommun, Map_data);
 	CrGameMode(GameModeCommun, Param);
 	CrBullets(BulletsCommun);
 	CrBlocks(BlocksCommun, JSON.stringify(Map_data));
+	resources.connect(ResourcesCommun);
 	
 //====================PlayersManager===============================
 

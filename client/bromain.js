@@ -1,5 +1,4 @@
 require("../lib/mof.js");
-require("typesjs");
 
 const Base64 = require("js-base64").Base64;
 
@@ -7,8 +6,6 @@ const PIXI = require("pixi.js");
 
 const CrInterfice = require("AsynCommun").CrCommunicator;
 const CrInterWs = require("../lib/ws_client.js");
-
-const Types = require("./inter_types_client.js");
 
 const CrSession = require("../src/session.js");
 const CrKeyboard = require("./keyboard.js");
@@ -18,7 +15,7 @@ const Map_data = require("../src/map.json");
 
 var onlyClient = false;
 
-var url = 'ws://192.168.137.2:8081';
+var url = 'ws://192.168.1.77:8081';
 
 
 CrGame(onlyClient, url, Map_data);

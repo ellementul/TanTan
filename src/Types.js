@@ -1,18 +1,20 @@
-require("typesjs");
-var T = Object.types;
+
+var T = require("typesjs");
 
 var map_size = 25;
 exports.map_size = map_size;
-exports.obj_id = T.pos(map_size*map_size*2);
+exports.obj_id = T.Index.Def(map_size*map_size*2);
 
-exports.box = {
-	w: T.num(0, map_size, 2), 
-	h: T.num(0, map_size, 2)
-};
-
-exports.position = T.obj({
-	x: T.num(0, map_size, 2), 
-	y: T.num(0, map_size, 2)
+exports.box = T.Object.Def({
+	w: T.Number.Def(map_size, 0, 2), 
+	h: T.Number.Def(map_size, 0, 2)
 });
 
-exports.direction = T.num(-1, 1, 1);
+exports.position = T.Object.Def({
+	x: T.Number.Def(map_size, 0, 2), 
+	y: T.Number.Def(map_size, 0, 2)
+});
+
+exports.direction = T.Number.Def(1, -1, 1);
+
+exports.path = T.Array.Def(T.String.Def('\\w\\d_.', 256), 256);

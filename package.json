@@ -2,10 +2,9 @@
   "name": "tanki",
   "version": "0.3.0",
   "description": "2D Shooter Game",
-  "main": "./server/main.js",
+  "main": "index.js",
   "scripts": {
-    "start": "node ./server/main.js 2> error.txt",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node ./index.js"
   },
   "keywords": [
     "Game",
@@ -15,10 +14,11 @@
   "author": "Ellementul_and_Chibi",
   "license": "ISC",
   "dependencies": {
-    "asyncommun": "git+https://github.com/ellementul/AsynCommun.git",
+    "asyncommun": "git+https://github.com/ellementul/asynccommun.git",
     "js-base64": "^2.5.1",
     "node-static": "^0.7.11",
-    "pixi.js": "^4.8.5",
+    "pixi.js": "^4.8.8",
+    "rescat.js": "git+https://github.com/ellementul/rescat.git",
     "typesjs": "git+https://github.com/ellementul/typesjs.git",
     "ws": "^6.1.2"
   }

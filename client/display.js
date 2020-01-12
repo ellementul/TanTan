@@ -1,3 +1,5 @@
+const CrGui = require("./gui.js");
+
 function CrDisplay(){
 	var Input = CrHoarder();
 	
@@ -5,28 +7,8 @@ function CrDisplay(){
 	var World = null;
 	var List = {};
 	
-	var app = new PIXI.Application(window.innerWidth, window.innerHeight, {backgroundColor : 0x1099bb});
-	document.body.appendChild(app.view);
-	
-//==================STAT==============================
-	
-	var stat = document.createElement("div");
-	stat.style.position = "fixed";
-	document.body.insertBefore(stat, app.view);
-
-
-
-	Stat.write = function(obj){
-		for (var key in obj){
-			this.data[key] = obj[key];
-		}
-		
-		var str = "";
-		for (var key in this.data){
-			str += key + ": " + this.data[key] + "<br>";
-		}
-		stat.innerHTML = "<p>" + str + "</p>";
-	};
+	let app = new PIXI.Application(window.innerHeight, window.innerHeight, {backgroundColor : 0x000000});
+	const gui = CrGui(app.view);
 
 //===============PreLoadTiles========================
 
@@ -60,7 +42,7 @@ function CrDisplay(){
 	function InputMess(mess){
 		switch(mess.type){
 			case "Actor": InputActors(mess); break;
-			case "GUI": UpdateGUI(mess); break;
+			case "GUI": gui.update(mess); break;
 			case "Tiles":  InputTiles(mess); break;
 			case "Map":  InputMap(mess); break;
 			default: console.error("Mess of Unknowed type", mess); 
@@ -103,10 +85,6 @@ function CrDisplay(){
 			action: "ReadyLoad",
 			type: "Map"
 		});
-	}
-
-	function UpdateGUI(mess){
-		Stat.write(mess.data);
 	}
 
 //===============Objects==================

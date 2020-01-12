@@ -1,0 +1,6 @@
+{
+	"confDir": [".", "configs"],
+	"imagesDir": [".", "img"],
+	"blocks": ["server", "blocks"],
+	"userConf": [".", "user.json"]
+}

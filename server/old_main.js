@@ -1,4 +1,3 @@
-require("../lib/mof.js");
 require("./http.js");
 
 const WsTypes = require("../src/WsTypes.js");

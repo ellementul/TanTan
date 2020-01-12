@@ -1,146 +1,96 @@
-require("typesjs");
-require("typesjs/str_type");
-
-var T = Object.types;
-var types = require("./Types.js");
+const T = require("typesjs");
+const types = require("./Types.js");
 
 function CrTypesKeyboard(){
-	var TypeReadyTiles = T.obj({
-		action: "ReadyLoad",
-		type: T.any("Tiles", "Map")
-	});
 
-	var TypeWalk = T.obj({
-		action: "Move",
-		dir: types.direction
-	});
-
-	var TypeFire = T.obj({
-		action: "Fire"
-	});
-
+	let typeMesgs = T.Switch.Def("action", 
+		[{
+			action: "ReadyLoad",
+			type: T.Any.Def(T.Const.Def("Tiles"), T.Const.Def("Map")),
+		},{
+			action: "Move",
+			dir: types.direction
+		},{
+			action: "Fire"
+		}]
+	);
 
 	return function(mess){
-		switch(mess.action){
-			case "Move":
-				ValidError(TypeWalk.test, mess); 
-				break;
-			case "Fire":
-				ValidError(TypeFire.test, mess); 
-				break;
-			case "ReadyLoad":
-				ValidError(TypeReadyTiles.test, mess); 
-				break;
-			default: ValidDefault(mess);
-		}
+		ValidError(typeMesgs.test, mess);
 		return mess;
 	}
+			
 }
 
 function CrTypesDisplay(){
-	
-	
-	var CreateMapType = T.obj({
-		action: "Create",
-		type: "Map",
-		size: T.pos(types.map_size)
-	});
 
-	var CreateActorType = T.obj({
-		action: "Create",
-		type: "Actor",
-		actor_type: T.str(/^[\w\d]*$/, 50),
+	let TileType = T.Object.Def({
 		id: types.obj_id,
-		sprite: types.obj_id,
-		box: types.box,
-		pos: types.position,
-		dir: types.direction
+		images: T.Array.Def(T.String.Def('\\w\\d\\s+:;.,?!=#\\/<>"()-\\]}{', 1024*1024-1), 1),
+		type: T.Any.Def(T.Const.Def("steel")),
+		size: T.Index.Def(types.map_size)
 	});
-
-	var UpdateActorType = T.obj({
-		action: "Update",
-		type: "Actor",
-		actor_type: T.str(/^[\w\d]*$/, 50),
-		id: types.obj_id,
-		box: T.any(undefined, types.box),
-		pos: types.position,
-		dir: types.direction
-	});
-
-	var DelActorType = T.obj({
+	
+	let typeMesgs = T.Switch.Def(["action", "type"],
+		[{
+			action: "Update",
+			type: "GUI",
+			setBackground: types.path,
+		},/*{
+			action: "Create",
+			type: "Map",
+			size: T.Index.Def(types.map_size)
+		},{
+			action: "Create",
+			type: "Actor",
+			actor_type: T.Key.Def(),
+			id: types.obj_id,
+			sprite: types.obj_id,
+			box: types.box,
+			pos: types.position,
+			dir: types.direction
+		},{
+			action: "Update",
+			type: "Actor",
+			actor_type: T.Key.Def(),
+			id: types.obj_id,
+			box: T.Any.Def(types.box),
+			pos: types.position,
+			dir: types.direction
+		},{
 			action: "Dell",
 			type: "Actor",
-			actor_type: T.str(/^[\w\d]*$/, 50),
+			actor_type: T.Key.Def(),
 			id: types.obj_id,
-	});
-
-	var TileType = T.obj({
-			id: types.obj_id,
-			images: T.arr(T.str(/^[\w\d\s+:;.,?!=#\/<>"()-\]}{]*$/, 1024*1024)),
-			type: T.any("steel"),
-			size: T.pos(types.map_size)
-	});
-
-	var AddTileType = T.obj({
-		action: "Add",
-		type: "Tiles",
-		tile: TileType
-	});
-
-	var TilesType = T.obj({
-		action: "Create",
-		type: "Tiles",
-		tiles: T.arr(TileType, 64, false)
-	});
-
-	var UpdateGUIStatus = T.obj({
-		action: "Update", 
-		type: "GUI", 
-		data: T.any({
-			Status: T.str(/^[\w\d\s]*$/, 50), 
-			login: T.str(/^[\w\d]*$/, 50),
 		},{
-			Status: T.any("Play", "Win", "Lose"),
-			Winner: T.any(undefined, T.str(/^[\w\d]*$/, 50)),
-            life: T.pos(1024),
-            deaths: T.pos(1024),
-            kills: T.pos(1024)
-		})
-	});
-
-	// var DelMapType = T.obj({
-	// 		action: "Dell",
-	// 		type: "Map"
-	// });
+			action: "Add",
+			type: "Tiles",
+			tile: TileType
+		},{
+			action: "Create",
+			type: "Tiles",
+			tiles: T.Array.Def(TileType, 64, false)
+		},{
+			action: "Update", 
+			type: "GUI", 
+			data: T.Any.Def( 
+				T.Object.Def({
+					Status: T.String.Def("\w\d\s", 50), 
+					login: T.String.Def("\w\d", 50),
+				}), 
+				T.Object.Def({
+					Status: T.Any.Def(T.Const.Def("Play"), T.Const.Def("Win"), T.Const.Def("Lose")),
+					Winner: T.Any.Def(T.String.Def("\w\d", 50)),
+		            life: T.Index.Def(1024),
+		            deaths: T.Index.Def(1024),
+		            kills: T.Index.Def(1024)
+				})
+			)
+		}*/]
+	);
 
 	return function(mess){
-		switch(mess.type){
-			case "Map":
-				switch(mess.action){
-					case "Create": ValidError(CreateMapType.test, mess); break;
-					default: ValidDefault(mess);
-				} break;
-			case "GUI":
-				switch(mess.action){
-					case "Update": ValidError(UpdateGUIStatus.test, mess); break;
-					default: ValidDefault(mess);
-				} break;
-			case "Tiles":
-				switch(mess.action){
-					case "Create": ValidError(TilesType.test, mess); break;
-					case "Add": ValidError(AddTileType.test, mess); break;
-					default: ValidDefault(mess);
-				} break;
-			case "Actor":
-				switch(mess.action){
-					case "Create": ValidError(CreateActorType.test, mess); break;
-					case "Update": ValidError(UpdateActorType.test, mess); break;
-					case "Dell": ValidError(DelActorType.test, mess); break;
-					default: ValidDefault(mess);
-				} break;
-			default: ValidDefault(mess);
-		}
-		
+		ValidError(typeMesgs.test, mess);
 		return mess;
 	}
 }
@@ -148,10 +98,6 @@ function CrTypesDisplay(){
 function ValidError(test, val){
 	if(test(val))
 		throw new Error(JSON.stringify({type: test(val), value: val}, "", 4));
-}
-
-function ValidDefault(val){
-	throw new Error(JSON.stringify({type: "unknowed type", value: val}, "", 4));
 }
 
 module.exports = [CrTypesKeyboard(), CrTypesDisplay()];
