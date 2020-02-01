@@ -24,18 +24,18 @@ function CrTypesKeyboard(){
 
 function CrTypesDisplay(){
 
-	let TileType = T.Object.Def({
+	/*let TileType = T.Object.Def({
 		id: types.obj_id,
 		images: T.Array.Def(T.String.Def('\\w\\d\\s+:;.,?!=#\\/<>"()-\\]}{', 1024*1024-1), 1),
 		type: T.Any.Def(T.Const.Def("steel")),
 		size: T.Index.Def(types.map_size)
-	});
+	});*/
 	
 	let typeMesgs = T.Switch.Def(["action", "type"],
 		[{
-			action: "Update",
-			type: "GUI",
-			setBackground: types.path,
+			action: "Load",
+			type: "Resources",
+			resources: T.Array.Def(types.resource, 64)
 		},/*{
 			action: "Create",
 			type: "Map",
@@ -97,7 +97,7 @@ function CrTypesDisplay(){
 
 function ValidError(test, val){
 	if(test(val))
-		throw new Error(JSON.stringify({type: test(val), value: val}, "", 4));
+		throw new Error(JSON.stringify(test(val), "", 4));
 }
 
 module.exports = [CrTypesKeyboard(), CrTypesDisplay()];

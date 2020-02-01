@@ -1,3 +1,5 @@
+const PIXI = require("pixi.js");
+
 const CrGui = require("./gui.js");
 
 function CrDisplay(){
@@ -10,24 +12,12 @@ function CrDisplay(){
 	let app = new PIXI.Application(window.innerHeight, window.innerHeight, {backgroundColor : 0x000000});
 	const gui = CrGui(app.view);
 
-//===============PreLoadTiles========================
+//===============LoadResources========================
+	const loader = PIXI.Loader.shared;
 
-	var Tiles = [];
-
-	function drawSvg(svg_str){
-		var img = document.createElement('img');
-		img.src = "data:image/svg+xml;base64,"+ Base64.encode(svg_str);
-		return PIXI.Sprite.from(img);
-	}
-
-	function AddTile(tile){
-		tile.images = tile.images.map(drawSvg);
-		Tiles[tile.id] = tile;
-	}
-	
-	function LoadTiles(mess){
-		mess.tiles.forEach(AddTile);
-		ReadyTiles();
+	function loadImages(msg){
+		msg.resources.forEach(({id, fullPath}) => loader.add(id, fullPath.join('/')));
+		loader.load(loader => console.log(loader.resources));
 	}
 	
 
@@ -39,13 +29,21 @@ function CrDisplay(){
 
 	return this;
 
-	function InputMess(mess){
-		switch(mess.type){
-			case "Actor": InputActors(mess); break;
-			case "GUI": gui.update(mess); break;
-			case "Tiles":  InputTiles(mess); break;
-			case "Map":  InputMap(mess); break;
-			default: console.error("Mess of Unknowed type", mess); 
+	function InputMess(msg){
+		switch(msg.type){
+			case "Resources": inputResources(msg); break;
+			case "Actor": InputActors(msg); break;
+			case "GUI": gui.update(msg); break;
+			case "Tiles":  InputTiles(msg); break;
+			case "Map":  InputMap(msg); break;
+			default: console.error("Mess of Unknowed type", msg); 
+		}
+	}
+
+	function inputResources(msg){
+		switch(msg.action){
+			case "Load":  loadImages(msg); break;
+			default: console.error("Mess of Unknowed action", msg);
 		}
 	}
 

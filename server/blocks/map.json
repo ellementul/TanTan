@@ -1,0 +1,9 @@
+{
+	"tags": ["map", "blocks"],
+	"blocks": [
+		{
+			"pos": [1, 1],
+			"tile": 0
+		}
+	]
+}

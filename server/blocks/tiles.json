@@ -1,7 +1,0 @@
-{
-	"type": "tiles",
-	"basePath": ["img"],
-	"tiles": [
-		["block.jpg"]
-	]
-}

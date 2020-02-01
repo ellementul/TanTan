@@ -1,0 +1,15 @@
+{
+	"tags": ["tileset"],
+	"tiles": [
+		{
+			"tags": ["block"],
+			"size": [1,1],
+			"image": 0
+		}
+	],
+	"images": [
+		{
+			"path": ["block.jpg"]
+		}
+	]
+}
