@@ -20,18 +20,23 @@ const resources = T.Array.Def(T.Object.Def({
 	path,
 }), 64, false);
 
+
+//==================Types of Messeges======================
+
 let switchKey = "action";
-//Types of Messeges
+
 let Types = [{
 	action: "AddedResArr",
 	success,
 	addedIds: T.Array.Def(T.Object.Def({ oldId: id, newId: uid }), 64, true),
-	adr: source
 },{
 	action: "AddedType",
 	success,
 	type: type,
-	adr: source
+},{
+	action: "AddedWall",
+	success,
+	id,
 },{
 	action: "Connected",
 	adress: T.Key.Def(),

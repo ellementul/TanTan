@@ -20,6 +20,7 @@
     "pixi.js": "^5.0.0",
     "rescat.js": "git+https://github.com/ellementul/rescat.git",
     "typesjs": "git+https://github.com/ellementul/typesjs.git",
+    "uuid": "^3.4.0",
     "ws": "^6.1.2"
   }
 }

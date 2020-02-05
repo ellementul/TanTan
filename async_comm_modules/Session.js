@@ -1,6 +1,5 @@
 const CrRouting = require("AsynCommun").CrRouter;
 const CrCommun = require("AsynCommun").CrCommunicator;
-const CrMultiComm = require("AsynCommun").CrMultiComm;
 
 const CrResources = require("rescat.js");
 CrResources.valid = {
@@ -20,7 +19,7 @@ CrSpace.valid = {
 	output: ValidError(CrSpace.types.output.test),
 };
 
-const CrClientManager = require("./ClientManager.js");
+const CrClientManager = require("./clients/main.js");
 
 const moduleName = "Session";
 
@@ -44,17 +43,21 @@ function CrSession(CommSessions, configPaths){
 	let SpaceComm = new CrCommun(CrSpace.valid.input,  CrSpace.valid.output);
 	CrSpace(SpaceComm, configPaths);
 
-	let GamersComm = new CrCommun();
+	
 	let MangerComm = new CrCommun();
-
-	this.addClient = CrClientManager(MangerComm, CrMultiComm(GamersComm));
+	this.addClient = CrClientManager(MangerComm, Router);
 	
 	Router(CatalogsComm, "Catalogs");
-	Router(BlocksComm, "Blocks");
 	Router(SpaceComm, "Space");
+	Router(BlocksComm, "Blocks");
 	Router(MangerComm, "ManGame");
-	Router(GamersComm, "Gamers");
 	Router(SelfComm, moduleName);
+
+
+	
+	
+
+	
 
 
 

@@ -3,19 +3,48 @@ function CrMap(Commun){
 	let List = {
 		Gamer: new Map(),
 		Bullet: new Map(),
-		Block: new Map()
+		walls: new Map(),
 	};
 
 	CrMovingLoop(List.Gamer, Move);
 	CrMovingLoop(List.Bullet, Move);
 	
-	let Output = Commun.connect(Input);
+	let send = Commun.connect(input);
 
-	function Input(msg){
+	function input(msg){
 		switch(msg.action){
-			case "Connected": break; 
+			case "Connected": init(); break;
+			case "Add": actionAdd(msg); break; 
 			default: throw new TypeError(JSON.stringify(msg, "", 4));
 		}
+	}
+
+	function init(){
+		send.gamers = msg => {msg.adr = "Gamers"; send(msg);}
+	}
+
+	function actionAdd({ id, coords, collisFig, idImage, source}){
+		List.walls.set(id, {
+			coords,
+			collisFig,
+			idImage,
+		});
+
+		send({
+			action: "AddedWall",
+			id,
+			success: true,
+			adr: source
+		})
+
+		send.gamers({
+			action: "Added",
+			type: "Actor",
+			id,
+			coords,
+			size: collisFig.size,
+			idImage,
+		});
 	}
 
 	function Move(){
