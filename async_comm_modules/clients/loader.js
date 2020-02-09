@@ -17,10 +17,11 @@ function CrLoader(commGamers){
 
 		send.space({
 			action: "Load",
+			type: "World",
 		});
 
-		function inputClient(){
-
+		function inputClient(msg){
+			console.log(msg);
 		}
 
 		function sendClient(msg){

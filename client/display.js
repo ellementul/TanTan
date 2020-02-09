@@ -12,30 +12,33 @@ function CrDisplay(){
 	let app = new PIXI.Application(window.innerHeight, window.innerHeight, {backgroundColor : 0x000000});
 	const gui = CrGui(app.view);
 
+	
+
 //===============LoadResources========================
-	const loader = PIXI.Loader.shared;
+	const Loader = PIXI.Loader.shared;
+
+	
 
 	function loadImages(msg){
-		msg.resources.forEach(({id, fullPath}) => loader.add(id, fullPath.join('/')));
-		loader.load(loader => console.log(loader.resources));
+		msg.resources.forEach(({id, fullPath}) => Loader.add(id, fullPath.join('/')));
+		Loader.load();
 	}
 	
 
 //==================INPUT===============	
 	
 	this.input =  function(val){
-		InputMess(val);
+		inputMess(val);
 	}
 
 	return this;
 
-	function InputMess(msg){
+	function inputMess(msg){
 		switch(msg.type){
 			case "Resources": inputResources(msg); break;
 			case "Actor": InputActors(msg); break;
 			case "GUI": gui.update(msg); break;
-			case "Tiles":  InputTiles(msg); break;
-			case "Map":  InputMap(msg); break;
+			case "World":  inputWorld(msg); break;
 			default: console.error("Mess of Unknowed type", msg); 
 		}
 	}
@@ -55,10 +58,10 @@ function CrDisplay(){
 		}
 	}
 
-	function InputMap(mess){
-		switch(mess.action){
-			case "Create":  CrMap(mess); break;
-			default: console.error("Mess of Unknowed action", mess);
+	function inputWorld(msg){
+		switch(msg.action){
+			case "Load":  CrWorld(msg); break;
+			default: console.error("Mess of Unknowed action", msg);
 		}
 	}
 
@@ -80,8 +83,8 @@ function CrDisplay(){
 
 	function ReadyMap(){
 		this.output({
-			action: "ReadyLoad",
-			type: "Map"
+			action: "Ready",
+			type: "World"
 		});
 	}
 
@@ -109,24 +112,36 @@ function CrDisplay(){
 		}
 	}
 	
-	function CrElem(mess){
-		size_cof = World.size_cof;
+	function CrActor({idImage, coords, sizes}){
+
+		let initSprite = () =>{
+			size_cof = World.size_cof;
 		
-		var elem = new PIXI.Sprite(Tiles[mess.sprite].images[0].texture);
-		elem.anchor.set(0.5);
+			var sprite = new PIXI.Sprite(Loader.resources[idImage].texture);
+
+			sprite.anchor.set(0.5);
+			
+			sprite.x = coords.x * size_cof + (sizes.w / 2);
+			sprite.y = coords.y * size_cof + (sizes.h / 2;
+			
+			sprite.width = size_cof * sizes.w;
+			sprite.height = size_cof * sizes.h;
+			
+			//if(mess.dir !== undefined) elem.rotation = mess.dir * Math.PI;
+			
+			app.stage.addChild(sprite);
+		}
+
+		if(Loader.progress < 100)
+			Loader.on("load",  initSprite);
+		else
+			initSprite();
+			
 		
-		elem.x = mess.pos.x * size_cof;
-		elem.y = mess.pos.y * size_cof;
+		//World.add(sprite);
 		
-		elem.width = size_cof * mess.box.w * 2;
-		elem.height = size_cof * mess.box.h * 2;
-		
-		if(mess.dir !== undefined) elem.rotation = mess.dir * Math.PI;
-		
-		World.add(elem);
-		
-		if(!List[mess.actor_type]) List[mess.actor_type] = [];
-		List[mess.actor_type][mess.id] = elem;
+		//if(!List[mess.actor_type]) List[mess.actor_type] = [];
+		//List[mess.actor_type][mess.id] = elem;
 	}
 	
 	function DellElem(mess){
@@ -146,21 +161,26 @@ function CrDisplay(){
 
 //============MAP===============
 
-	function CrMap(mess){
+	function CrWorld({ size, actors }){
 		var world = new PIXI.Container();
 		world.x = (window.innerWidth - window.innerHeight) / 2 ;
 		app.stage.addChild(world);
 		
 		World = {};
-		World.size_cof = window.innerHeight / mess.size; //Кофф. для перевода коорд. из серверных в дисплейные.
-		World.add = function(obj){
-			world.addChild(obj);
+		World.size_cof = window.innerHeight / size; //Кофф. для перевода коорд. из серверных в дисплейные.
+		
+		World.add = function(sprite){
+			
+			//world.addChild(obj);
 		}
+
 		World.dell = function(){
 			world.destroy();
 			World = null;
 		}
-		
+
+		actors.forEach(CrActor);
+
 		ReadyMap();
 	}
 	

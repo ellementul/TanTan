@@ -1,5 +1,7 @@
 function CrMap(Commun){
 
+	const _spaceSize = 10;
+
 	let List = {
 		Gamer: new Map(),
 		Bullet: new Map(),
@@ -14,7 +16,8 @@ function CrMap(Commun){
 	function input(msg){
 		switch(msg.action){
 			case "Connected": init(); break;
-			case "Add": actionAdd(msg); break; 
+			case "Add": actionAdd(msg); break;
+			case "Load": loadWorld(msg); break;  
 			default: throw new TypeError(JSON.stringify(msg, "", 4));
 		}
 	}
@@ -44,6 +47,27 @@ function CrMap(Commun){
 			coords,
 			size: collisFig.size,
 			idImage,
+		});
+	}
+
+	function loadWorld({ source }){
+		let actors = [];
+
+		List.walls.forEach(({ coords, collisFig, idImage }, id) => actors.push(
+			{
+				id,
+				coords,
+				sizes: collisFig.size,
+				idImage,
+			}
+		));
+
+		send({
+			action: "Load",
+			type: "World",
+			size:  _spaceSize,
+			actors,
+			adr: source,
 		});
 	}
 

@@ -3,10 +3,10 @@ const types = require("./Types.js");
 
 function CrTypesKeyboard(){
 
-	let typeMesgs = T.Switch.Def("action", 
+	let typeMsgs = T.Switch.Def("action", 
 		[{
-			action: "ReadyLoad",
-			type: T.Any.Def(T.Const.Def("Tiles"), T.Const.Def("Map")),
+			action: "Ready",
+			type: T.Const.Def("World"),
 		},{
 			action: "Move",
 			dir: types.direction
@@ -15,9 +15,9 @@ function CrTypesKeyboard(){
 		}]
 	);
 
-	return function(mess){
-		ValidError(typeMesgs.test, mess);
-		return mess;
+	return function(msg){
+		ValidError(typeMsgs.test, msg);
+		return msg;
 	}
 			
 }
@@ -36,6 +36,11 @@ function CrTypesDisplay(){
 			action: "Load",
 			type: "Resources",
 			resources: T.Array.Def(types.resource, 64)
+		},{
+			action: "Load",
+			type: "World",
+			size: types.position,
+			actors: T.Array.Def(types.actor, 1024)
 		},/*{
 			action: "Create",
 			type: "Map",

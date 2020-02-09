@@ -46,6 +46,9 @@ let Types = [{
 	collisFig: box,
 	idImage: uid,
 },{
+	action: "Load",
+	type: T.Const.Def("World"),
+},{
 	action: "Connected",
 	adress: T.Key.Def(),
 }];
